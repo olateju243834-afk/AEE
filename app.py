@@ -23,15 +23,15 @@ logging.basicConfig(level=logging.DEBUG)
 # Initialize app
 # --------------------------------------------------------
 app = Flask(__name__)
-#if not os.environ.get("SESSION_SECRET"):
-#    raise RuntimeError("SESSION_SECRET environment variable must be set")
-#app.secret_key = os.environ["SESSION_SECRET"]
+if not os.environ.get("SESSION_SECRET"):
+    raise RuntimeError("SESSION_SECRET environment variable must be set")
+app.secret_key = os.environ["SESSION_SECRET"]
 
 
 # --------------------------------------------------------
 # Database configuration (PostgreSQL instead of SQLite)
 # --------------------------------------------------------
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "postgresql://aee_user:EMMYfest643@localhost:5432/aee_prj"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "postgresql://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
