@@ -1,0 +1,258 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agricultural and Environmental Engineering - University of Ibadan</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar" data-bs-offset="100">
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#home">
+                <!-- Editable Department Logo: Replace 'department-logo.png' with your department logo (supports .png, .jpg, .jpeg, .svg, .gif) -->
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC. & ENV ENGNR</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#staff">Staff</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#programs">Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#resources">Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#news">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#students">Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('payment')}}">Payment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+  
+  
+     <div class="news1">
+                <h2 class="head-news">Academic Programme</h2>
+                <p>
+     <p class="first-hd">The Agricultural and Environmental Engineering Programme has courses designed to reflect teaching and research focus in the following areas:</p>
+
+
+<div class="row mt-4" style="position: relative; bottom: 100px;">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                             <p class="card-text">
+ Farm Power, Machinery and Mechanization of Agricultural Operations as well as precision Agriculture.
+ Soil and Water Conservation, Irrigation, Drainage and Erosion Control in Agricultural Lands.
+Agricultural Processing, Storage, and Food Process Engineering
+Design, Control and Modelling of Natural and Agricultural Processes through the application of Smart Systems,  Electronics, Instrumentation, Information Technology and Computational Methods.
+Environmental Engineering with aspects of Pollution Monitoring, Analysis Design of waste handling and disposal systems and Environmental Impact Assessment.
+Farm Structures and Environment, Controlled Environment Agriculture, Structural Composite Development Rural and Farm Electrification
+ICT and Robotics in Agriculture
+                            </p>
+
+
+   <p class="card-text">
+These courses are offered in addition to pure science courses in Mathematics, Statistics, Physics and Chemistry, Agriculture as well as basic foundational Engineering courses especially in Mechanical, Electrical and Civil Engineering. The courses fully integrate theory with practical involvements and this is undertaken in the University Teaching and Research Farm, the International Institute of Tropical Agriculture (IITA), and industries during students Industrial Training and field visits. Thus, the programme accommodates common foundational engineering and mathematical courses at the initial stage to provide broad-based engineering training followed by special skills and in-depth study in areas mentioned above. The Department actively encourages inter-disciplinary and collaborative research and training with other Departments within and outside the Faculty, as well as in Nigeria and overseas.
+
+For admission into the Bachelors programme, in addition to an acceptable pass in the Unified Tertiary Matriculation Examination (UTME), candidates must have:
+
+a) Senior Secondary School Certificate (SSCE) credit passes in English Language, Mathematics, Physics, Chemistry and any one at one sitting or any two at two sittings from the following subjects: Biology, Agricultural Science, Technical Drawing, Economics, Geography, Metal/Woodwork and Further Mathematics or;
+
+b) West African School Certificate (WASC) / General Certificate of Education (GCE) Ordinary Level credit passes in English Language, Mathematics, Physics, and Chemistry and any one at one sitting or any two at two sittings from the following subjects: Biology, Agricultural Science, Technical Drawing, Economics, Geography, Metal/Woodwork and Further Mathematics.
+
+c) Direct Entry: GCE Advanced Level in at least Mathematics and Physics plus any other one of the above into 200 level or Ordinary National Diploma (OND)/its equivalent from Polytechnics and Monotechnics. OND graduates must possess at least upper credit pass. Higher National Diploma (HND) or its equivalent holders who satisfy the above requirements may be admitted to 300 level.
+</p>
+
+
+In addition to the undergraduate programme, the Department offers approved postgraduate courses leading to the award of M.Sc., M.Phil. and Ph.D. degrees. The latter two are achieved mainly by rigorous and advanced research culminating in the production of a thesis capable of being published in peer-reviewed journals. Following a core of courses taught at the B.Sc. level; postgraduate Agricultural and Environmental Engineering programme was designed to bring advancement to the frontiers of academic study in the major subject areas.
+
+Programme Educational Objectives (PEOs)
+In the pursuit of excellence which the Agricultural and Environmental Engineering Department of the University of Ibadan is known for, it is our overall objective to produce graduates who are well-skilled, highly competent, dedicated to duty and globally competitive. These are embedded in the graduate attributes which students must attain before graduation from the University. Thus, our graduate attributes are:
+
+1.  To be professionally competent and demonstrate the competencies and value required of the Agricultural and Environmental Engineering professions.
+
+2.  To demonstrate professional, social, and ethical responsibility consistent with their roles as local and global citizens.
+
+3.  To be an effective communicator and collaborator, who can successfully work in multi-disciplinary teams and transfer knowledge to relevant stakeholders.
+
+4.  To be creative and innovative about using appropriate technology to solve problems.
+
+5.  To use relevant information and research-drawn facts in rendering sound decisions and developing insights for new knowledge.
+
+6.  To be open to lifelong learning which would ensure continuous professional growth and development.
+
+7.  To be able to manage the environment sustainably, thereby promoting peace and prosperity for mankind.
+
+ 
+
+Towards achieving these, the Programme Educational Objectives (PEOs) are:
+
+<li>PE0-1: To produce graduates with sufficient knowledge to apply engineering principles to the practice of agriculture including mechanization, crop preservation and storage, irrigation and drainage, farm structures, controlled environment agriculture and rural electrification, and deployment of smart systems.</li>
+
+<li>PEO-2: To train engineers with sufficiently broad-based knowledge to tackle day-to-day agricultural engineering problems and continuously relate their acquired skills to the needs of the society.</li>
+
+<li>PEO-3: To produce graduates through a well-established training facility and curriculum which reflect professionalism in Agricultural and Environmental Engineering Practice.</li>
+
+<li>PEO-4: To produce graduates that are versatile in the operation, maintenance and repair of agricultural equipment that are used in agriculture and systems/processes that minimize environmental degradation.</li>
+
+<li>PEO-5: To prepare students for careers involving the application of engineering principles to agricultural production, provision of agricultural structures, food processing and conservation of land and water resources.</li>
+
+<li>PEO-6: Training in food and fiber production within the constraints of environmental protection and natural resources conservation.</li>
+
+The Department focusses on ensuring that students gain requisite skills which they would need for solving real-life problems. Our program is therefore designed to stimulate knowledge, skills and attitude that the students require while progressing through the program. Our specific Programme Outcomes (POs) which will guarantee achieving our graduate attributes (GAs) are summarized as follows:
+
+<li>PO1 - Engineering Knowledge: Towards becoming a certified Agricultural and Environmental engineer, the programme is designed to instill into the students the ability to apply knowledge of mathematics, science, engineering fundamentals and an engineering specialization to the solution of complex engineering problems.</li>
+
+<li>PO2 - Problem Analysis: By the end of the 5-year program, students would have developed ability to identify, formulate, search literature, and analyze complex engineering problems reaching substantiated conclusions using principles of mathematics, natural and engineering sciences.</li>
+
+<li>PO3 - Design/Development of Solutions: Upon the completion of the program students would have developed ability to design solutions for complex engineering problems and design systems, components or processes that meet specified needs with appropriate consideration for public health and safety, cultural, societal, and environmental considerations.</li>
+
+<li>PO4 - Investigation: By the end of the 5-year period, students would have been equipped with ability to investigate complex engineering problems in a methodical way including literature survey, design and conduct of experiments, analysis and interpretation of experimental data, and synthesis of information to derive firm conclusions.</li>
+
+<li>PO5 - Modern Tool Usage: A graduate of Agricultural and Environmental Engineering will have the ability to create, select and apply appropriate techniques, resources, and modern engineering and IT tools, including prediction and modelling, to complex engineering activities, with an understanding of the limitations are focused for the students.</li>
+
+<li>PO6 - The Engineer and Society: The focus of the program is to produce a graduate with the ability to apply reasoning informed by contextual knowledge to assess societal, health, safety, legal and cultural issues and the consequent responsibilities relevant to professional engineering practice and solution to complex engineering problems.</li>
+
+<li>PO7 - Environment and Sustainability: Agricultural and Environmental Engineering focuses on enshrining in our graduates the ability to understand the impact of professional engineering solutions in societal and environmental contexts and demonstrate knowledge of, and need for, sustainable development.</li>
+
+<li>PO8 - Ethics: A graduate of the Department of Agricultural and Environmental Engineering will understand and apply ethical principles, professional ethics, responsibilities and norms of engineering practice.</li>
+
+<li>PO9 - Individual and Team Work: The program develops the students to have abilities to work effectively, as an individual or in a team, on multifaceted and /or multidisciplinary settings.</li>
+
+<li>PO10 - Communication: After the 5-year period, students would have mastered their ability to communicate effectively, orally as well as in writing, on complex engineering activities with the engineering community and with society at large, such as being able to comprehend and write effective reports and design documentation, make effective presentations, and give and receive clear instructions.</li>
+
+<li>PO11 - Project Management: Graduates of the Department of Agricultural and Environmental Engineering will display ability to demonstrate management skills and apply engineering principles to one’s own work, as a member and/or leader in a team, to manage projects in a multidisciplinary environment.</li>
+
+<li>PO12 - Lifelong Learning: After completing the 5-year course work in the department, students would be able to recognize importance of, and pursue lifelong learning in the broader context of innovation and technological developments.</li>
+  </div>  
+</div>
+    </div>         
+             
+</div>          
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-success mb-3">Agricultural & Environmental Engineering</h5>
+                    <p class="small">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices at the University of Ibadan.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="text-success mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#about" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="#staff" class="text-light text-decoration-none">Faculty</a></li>
+                        <li><a href="#programs" class="text-light text-decoration-none">Programs</a></li>
+                        <li><a href="#resources" class="text-light text-decoration-none">Resources</a></li>
+                        <li><a href="#contact" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Academic Programs</h6>
+                    <ul class="list-unstyled small">
+                        <li>B.Eng Agricultural & Environmental Engineering</li>
+                        <li>M.Eng Agricultural & Environmental Engineering</li>
+                        <li>Ph.D Agricultural & Environmental Engineering</li>
+                        <li>Postgraduate Diploma Programs</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Contact Info</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Faculty of Technology, University of Ibadan
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        +234-xxx-xxx-xxxx
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        info.agric@ui.edu.ng
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="small mb-0">
+                        &copy; 2025 Department of Agricultural and Environmental Engineering, University of Ibadan. 
+                        All rights reserved. | Designed with excellence for academic distinction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

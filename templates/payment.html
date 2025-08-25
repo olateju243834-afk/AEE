@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departmental Payment Portal - Agricultural and Environmental Engineering</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <!-- Editable Department Logo: Replace 'department-logo.png' with your department logo (supports .png, .jpg, .jpeg, .svg, .gif) -->
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC & ENV ENG</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#news">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Payment Hero Section -->
+    <section id="payment-hero" style="background-image: url('/static/images/paymentbk..jpeg');  background-size: cover; background-position: center; background-repeat: no-repeat;" class="hero-section" >
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="row align-items-center min-vh-50">
+                    <div class="col-lg-12 text-center text-white">
+                        <h1 class="display-4 fw-bold mb-4">Departmental Payment Portal</h1>
+                        <p class="lead fs-5 mb-4">Agricultural and Environmental Engineering Department Dues</p>
+                        <div class="hero-badges">
+                            <span class="badge bg-success fs-6 me-3"><i class="fas fa-university me-2"></i>Official Portal</span>
+                            <span class="badge bg-info fs-6 me-3"><i class="fas fa-shield-alt me-2"></i>Secure Process</span>
+                            <span class="badge bg-warning fs-6"><i class="fas fa-receipt me-2"></i>Receipt Upload</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Payment Section -->
+    <section id="payment-main" class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Student Information Form -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm sticky-top" style="top: 100px;">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Student Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="studentInfoForm">
+                                <div class="mb-3">
+                                    <label for="fullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="matricNumber" class="form-label">Matric Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="matricNumber" placeholder="e.g., 123456" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="level" class="form-label">Academic Level <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="level" required>
+                                        <option value="">Select your level</option>
+                                        <option value="100">100 Level</option>
+                                        <option value="200">200 Level</option>
+                                        <option value="300">300 Level</option>
+                                        <option value="400">400 Level</option>
+                                        <option value="500">500 Level</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="phoneNumber" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="phoneNumber" required>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Options -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Payment Options</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> Select the payment items applicable to your level. Amounts may vary by level.
+                            </div>
+
+                            <div id="paymentOptions">
+                                <!-- Mandatory Dues -->
+                                <div class="payment-category mb-4">
+                                    <h6 class="text-primary border-bottom pb-2"><i class="fas fa-exclamation-circle me-2"></i>Mandatory Dues</h6>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="5000" id="departmentalDues" data-name="Departmental Association Dues" checked disabled>
+                                                <label class="form-check-label ms-2" for="departmentalDues">
+                                                    <strong>Departmental Association Dues</strong>
+                                                    <small class="d-block text-muted">Annual membership fee for all students</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-success fs-6" id="departmentalDuesAmount">₦5,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="3000" id="examFee" data-name="Examination Processing Fee" checked disabled>
+                                                <label class="form-check-label ms-2" for="examFee">
+                                                    <strong>Examination Processing Fee</strong>
+                                                    <small class="d-block text-muted">Semester examination materials and processing</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-success fs-6" id="examFeeAmount">₦3,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Dues -->
+                                <div class="payment-category mb-4">
+                                    <h6 class="text-warning border-bottom pb-2"><i class="fas fa-plus-circle me-2"></i>Optional Dues</h6>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="1500" id="labCoat" data-name="Laboratory Coat">
+                                                <label class="form-check-label ms-2" for="labCoat">
+                                                    <strong>Laboratory Coat</strong>
+                                                    <small class="d-block text-muted">Standard agricultural engineering lab coat</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦1,500</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="1500" id="safetyBoots" data-name="Safety Boots">
+                                                <label class="form-check-label ms-2" for="safetyBoots">
+                                                    <strong>Safety Boots</strong>
+                                                    <small class="d-block text-muted">Required for field work and practical sessions</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦1,500</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="3500" id="handbook" data-name="Department Handbook">
+                                                <label class="form-check-label ms-2" for="handbook">
+                                                    <strong>Department Handbook</strong>
+                                                    <small class="d-block text-muted">Comprehensive guide and reference materials</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦3,500</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="2500" id="industrialTraining" data-name="Industrial Training Support">
+                                                <label class="form-check-label ms-2" for="industrialTraining">
+                                                    <strong>Industrial Training Support</strong>
+                                                    <small class="d-block text-muted">IT placement assistance and supervision (400L & 500L)</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦2,500</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="1000" id="projectSupervision" data-name="Project Supervision Fee">
+                                                <label class="form-check-label ms-2" for="projectSupervision">
+                                                    <strong>Project Supervision Fee</strong>
+                                                    <small class="d-block text-muted">Final year project guidance and supervision (500L only)</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦1,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-item mb-3">
+                                        <div class="form-check d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input class="form-check-input payment-checkbox" type="checkbox" value="1500" id="excursion" data-name="Educational Excursion">
+                                                <label class="form-check-label ms-2" for="excursion">
+                                                    <strong>Educational Excursion</strong>
+                                                    <small class="d-block text-muted">Field trips to agricultural facilities and industries</small>
+                                                </label>
+                                            </div>
+                                            <span class="badge bg-info fs-6">₦1,500</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Summary -->
+                            <div class="mt-4 p-3 bg-light rounded">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="text-primary">Payment Summary</h6>
+                                        <div id="selectedItems">
+                                            <small class="text-muted">Selected items will appear here</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <h6 class="text-success">Total Amount</h6>
+                                        <span class="h4 text-success" id="totalAmount">₦8,000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method and Receipt Upload -->
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Method & Receipt Upload</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Payment Instructions -->
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-primary">Payment Instructions</h6>
+                                    <div class="alert alert-success">
+                                        <strong>Bank Transfer Details:</strong><br>
+                                        <strong>Account Name:</strong> Agricultural & Environmental Engineering Dept<br>
+                                        <strong>Account Number:</strong> 1234567890<br>
+                                        <strong>Bank:</strong> First Bank of Nigeria<br>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Important:</strong> Please use your Matric Number as the transfer reference/narration.
+                                    </div>
+                                </div>
+
+                                <!-- Receipt Upload -->
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-primary">Upload Payment Receipt</h6>
+                                    <div class="mb-3">
+                                        <label for="paymentReceipt" class="form-label">Upload Receipt <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="paymentReceipt" accept=".jpg,.jpeg,.png,.pdf" required>
+                                        <small class="text-muted">Supported formats: JPG, PNG, PDF (Max 5MB)</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="transactionRef" class="form-label">Transaction Reference</label>
+                                        <input type="text" class="form-control" id="transactionRef" placeholder="Enter transaction reference from receipt">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="paymentDate" class="form-label">Payment Date</label>
+                                        <input type="date" class="form-control" id="paymentDate">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Receipt Preview -->
+                            <div id="receiptPreview" class="mt-3" style="display: none;">
+                                <h6 class="text-primary">Receipt Preview</h6>
+                                <div class="border rounded p-3 bg-light">
+                                    <img id="receiptImage" src="" alt="Receipt Preview" class="img-fluid rounded" style="max-height: 300px;">
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center mt-4">
+                                <button type="button" class="btn btn-success btn-lg" id="submitPayment">
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Payment Information
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Agricultural and Environmental Engineering</h5>
+                    <p class="mb-3">University of Ibadan, Nigeria</p>
+                    <p><i class="fas fa-envelope me-2"></i>info.agric@ui.edu.ng</p>
+                    <p><i class="fas fa-phone me-2"></i>+234-xxx-xxx-xxxx</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6>Quick Links</h6>
+                    <div class="mb-3">
+                        <a href="{{ url_for('index') }}" class="text-white me-3">Home</a>
+                        <a href="{{ url_for('index') }}#about" class="text-white me-3">About</a>
+                        <a href="{{ url_for('index') }}#contact" class="text-white">Contact</a>
+                    </div>
+                    <p class="small">&copy; 2025 Agricultural and Environmental Engineering Department. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

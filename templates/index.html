@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agricultural and Environmental Engineering - University of Ibadan</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar" data-bs-offset="100">
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#home">
+                <!-- Editable Department Logo: Replace 'department-logo.png' with your department logo (supports .png, .jpg, .jpeg, .svg, .gif) -->
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC. & ENV ENGNR</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('payment')}}">Payment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#staff">Staff</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#programs">Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#resources">Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#news">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#students">Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                     <li class="nav-item"><a class="nav-link" href="{{url_for('news1')}}">Academic Programme</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Hero Section -->
+    <section id="home" style="background-image: url('/static/images/back.jpg');  background-size: cover; background-position: center; background-repeat: no-repeat;" class="hero-section">
+        <!-- Editable Hero Background Image: Replace 'hero-background' with your departmental building image (supports .jpg, .jpeg, .png, .webp) -->
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="row align-items-center min-vh-100">
+                    <div class="col-lg-8 mx-auto text-center text-white">
+                        <h1 class="display-3 fw-bold mb-4" style="font-size: 50px;">Agricultural and Environmental Engineering</h1>
+                        <p class="lead fs-4 mb-5">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices</p>
+                        <div class="hero-badges">
+                            <span class="badge bg-success fs-6 me-3"><i class="fas fa-seedling me-2"></i>Sustainable Agriculture</span>
+                            <span class="badge bg-info fs-6 me-3"><i class="fas fa-water me-2"></i>Water Management</span>
+                            <span class="badge bg-warning fs-6"><i class="fas fa-leaf me-2"></i>Environmental Protection</span>
+                        </div>
+                        <div class="mt-5">
+                            <a href="#about" class="btn btn-outline-light btn-lg me-3">Learn More</a>
+                            <a href="#contact" class="btn btn-success btn-lg">Get in Touch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center mb-5">
+                        <h2 class="section-title">About Our Department</h2>
+                        <div class="title-underline"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <!-- Editable About Department Image: Replace 'about-department' with actual department image (supports .jpg, .jpeg, .png, .webp) -->
+                        <img src="{{ url_for('static', filename='images/cert.jpg') }}" alt="Department Overview" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary"><i class="fas fa-eye me-2"></i>Our Vision</h4>
+                            <p class="card-text">To achieve and sustain self-sufficiency in food and fibre through engineering.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary"><i class="fas fa-bullseye me-2"></i>Our Mission</h4>
+                            <p class="card-text">To produce high-level manpower that is worthy in character and sound judgement and to apply all aspects of engineering to agricuulture through research and community service.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary"><i class="fas fa-university me-2"></i>Department Overview</h4>
+                            <p class="card-text">The Department of Agricultural and Environmental Engineering was founded in 1972, it has played a leading role in 
+                                the development of the Faculty of Technology as well as the University. Our graduates both at B.Sc., M.Sc. and Ph.D.
+                                levels are working in various sections of the Nigerian economy where they have all been  contributing positively.
+                                Staff members are involved in teaching, research and community service  (consultancy) in areas such as farm machinery,
+                                power engineering, biofuels, irrigation and drainage, waste utilization, farm structures and environment, agricultural
+                                processing and storage, energy studies, system modelling and robotics in agriculture, environmental  control and Greenhouse
+                                engineering, to mention but a few.
+                            
+                            </p>
+                            <p class="card-text">The Department is well equipped to train the manpower required for transforming the agro-allied 
+                                sector of the Nigerian economy and our dedicated members of staff work in various fields of Agricultural and 
+                                Environmental Engineering, in order to meet the vision and mission of the programme.
+                            </p>
+                            <h5 class="mt-4 text-success">Our Core Areas:</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Agricultural Machinery and Equipment</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Irrigation and Drainage Engineering</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Post-Harvest Technology</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Food Process Engineering</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Environmental Impact Assessment</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Waste Management Systems</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Water Quality Management</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Renewable Energy Applications</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Staff & Faculty Section -->
+    <section id="staff" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Our Faculty & Staff</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Meet our distinguished faculty members and their research expertise</p>
+            </div>
+            <div class="row">
+                <!-- HOD -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                               
+                                <img src="{{ url_for('static', filename='images/staff/omobowale.jpg') }}" alt="HOD Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #2d5a27;">
+                            </div>
+                            <h5 class="card-title">Prof. M.O. Omobowale</h5>
+                            <p class="text-muted mb-2">Head of Department</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc, M.Sc., Ph.D. Agric. Engr. (Ibadan) R. Engr. (COREN) <br> Senior Lecturer</p>
+                            <p class="card-text"><strong>Email:</strong> mo.omobowale@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 101, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Faculty Member 2 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                               
+                                <img src="{{ url_for('static', filename='images/staff/sango.jpeg') }}" alt="Faculty Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #28a745;">
+                            </div>
+                            <h5 class="card-title">Prof. A. Y. Sangodoyin</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc. (Ibadan), M.Sc. Water Resources Technology, Ph.D. Civil Engineering, Birmingham, U.K., R. Engr. (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> prof.faculty1@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 102, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Faculty Member 3 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                               
+                                <img src="{{ url_for('static', filename='images/staff/Ajayi.jpeg') }}" alt="Faculty Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #17a2b8;">
+                            </div>
+                            <h5 class="card-title">Prof. E. A. Ajayi</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc., M.Sc. (Ibadan), Ph.D.
+                                 (G.B. Pant, India). MASABE, MNSE, MNIAE, MNIFST, Life Member 
+                                Indian Society of Environmental Scientists, Life Member Indian Society For Root Crops, Reg Engr (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> dr.faculty2@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 103, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Faculty Member 4 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                               
+                                <img src="{{ url_for('static', filename='images/staff/bami.png') }}" alt="Faculty Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #ffc107;">
+                            </div>
+                            <h5 class="card-title">Prof. A. I. Bamgboye</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc. Agricultural Engineering, M. Sc. Crop Processing and Storage,
+                                 Ph.D. Farm Power and Machinery (Ibadan) M.N.I.A.E., M.N.S.E., Reg. Engr (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> dr.faculty3@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 104, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Faculty Member 5 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                              
+                                <img src="{{ url_for('static', filename='images/staff/raji.png') }}" alt="Staff Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dc3545;">
+                            </div>
+                            <h5 class="card-title">Prof. A. O. Raji</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc. (Hons), M.Sc. (Ibadan), Ph.D. (Newcastle-upon-Tyne) 
+                                M.N.I.A.E., M.N.S.E., M.A.S.A.B.E., M.N.I.F.S.T., Regd. Engr. (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> engr.staff1@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 105, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                              
+                                <img src="{{ url_for('static', filename='images/staff/aremu.png') }}" alt="Staff Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dc3545;">
+                            </div>
+                            <h5 class="card-title">Prof. A. K. Aremu</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc. (Hons), M.Sc., Ph.D. Agric. Engineering (Ibadan).
+                                 MNIAE, MNSE, Reg Engr (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> engr.staff1@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 105, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Administrative Staff -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                               
+                                <img src="{{ url_for('static', filename='images/staff/mijin.png') }}" alt="Admin Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6c757d;">
+                            </div>
+                            <h5 class="card-title">Prof. Y. Mijinyawa</h5>
+                            <p class="text-muted mb-2">Professor</p>
+                            <p class="card-text"><strong>Responsibilities:</strong> B.Sc., M.Sc., Ph.D. Agric. Engrg. (Ibadan) 
+                                FNIAE, MNSE, MWASAE, MASAE, R. Engr.(COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> admin.agric@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 100, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                              
+                                <img src="{{ url_for('static', filename='images/staff/oyefeso.png') }}" alt="Staff Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dc3545;">
+                            </div>
+                            <h5 class="card-title">Dr. B. O. Oyefeso</h5>
+                            <p class="text-muted mb-2">Senior Lecturer</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Sc. (Hons.), M.Sc., Ph.D. Agric. and Env. Engrg. (Ibadan). 
+                                MNIAE, MNSE, MASABE, Reg. Engr. (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> engr.staff1@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 105, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                  <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                              
+                                <img src="{{ url_for('static', filename='images/staff/alabi.png') }}" alt="Staff Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dc3545;">
+                            </div>
+                            <h5 class="card-title">DR. H. A. Alabi</h5>
+                            <p class="text-muted mb-2">Lecturer</p>
+                            <p class="card-text"><strong>Qualifications:</strong> B.Eng. (Hons.) Agric. Engrg. (FUTA), M.Sc., Agric. and Env. Engrg. (Ibadan). 
+                                MNIAE, MASABE, Reg. Engr. (COREN)</p>
+                            <p class="card-text"><strong>Email:</strong> engr.staff1@ui.edu.ng</p>
+                            <p class="card-text"><strong>Office:</strong> Room 105, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                  <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="staff-card card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="staff-avatar mb-3">
+                              
+                                <img src="{{ url_for('static', filename='images/staff/kola.png') }}" alt="Staff Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dc3545;">
+                            </div>
+                            <h5 class="card-title"> Engr. O. O. Kolajo</h5>
+                            <p class="text-muted mb-2">Engineer</p>
+                            <p class="card-text"><strong>Qualifications:</strong>B.Tech.(Hons) (LAUTECH), M.Sc., (Ibadan), Reg. Engr. (COREN) </p>
+                            <p class="card-text"><strong>Email:</strong> engr.staff1@ui.edu.ng</p>  
+                            <p class="card-text"><strong>Office:</strong> Room 105, Agricultural Engineering Building</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                
+               
+            </div>
+        </div>
+    </section>
+
+    <!-- Academic Programs Section -->
+    <section id="programs" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Academic Programs</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Comprehensive programs designed to shape future engineers</p>
+            </div>
+            <div class="row">
+                <!-- Undergraduate Program -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Undergraduate Program</h4>
+                        </div>
+                        <div class="card-body">
+                            <h5>B.Eng. Agricultural and Environmental Engineering</h5>
+                            <p><strong>Duration:</strong> 5 Years (10 Semesters)</p>
+                            <p><strong>Admission Requirements:</strong></p>
+                            <ul>
+                                <li>WASSCE/NECO with credits in Mathematics, Physics, Chemistry, Biology, and English</li>
+                                <li>JAMB UTME score of at least 200</li>
+                                <li>Post-UTME screening</li>
+                            </ul>
+                            <h6 class="mt-3">Core Courses Include:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="small">
+                                        <li>Engineering Mathematics</li>
+                                        <li>Engineering Physics</li>
+                                        <li>Fluid Mechanics</li>
+                                        <li>Thermodynamics</li>
+                                        <li>Materials Science</li>
+                                        <li>Agricultural Machinery</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="small">
+                                        <li>Irrigation Engineering</li>
+                                        <li>Environmental Engineering</li>
+                                        <li>Food Process Engineering</li>
+                                        <li>Farm Structures</li>
+                                        <li>Project Management</li>
+                                        <li>Final Year Project</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Postgraduate Programs -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-user-graduate me-2"></i>Postgraduate Programs</h4>
+                        </div>
+                        <div class="card-body">
+                            <h6>M.Eng. Agricultural and Environmental Engineering</h6>
+                            <p><strong>Duration:</strong> 2 Years (4 Semesters)</p>
+                            
+                            <h6 class="mt-3">Ph.D. Agricultural and Environmental Engineering</h6>
+                            <p><strong>Duration:</strong> 3-5 Years</p>
+                            
+                            <p><strong>Admission Requirements:</strong></p>
+                            <ul>
+                                <li>B.Eng./B.Tech in related field with minimum 2nd Class Upper</li>
+                                <li>For Ph.D: M.Eng./M.Tech with minimum CGPA of 3.5/5.0</li>
+                                <li>Research proposal (for Ph.D)</li>
+                            </ul>
+                            
+                            <h6 class="mt-3">Research Areas:</h6>
+                            <ul class="small">
+                                <li>Precision Agriculture</li>
+                                <li>Water Resources Management</li>
+                                <li>Environmental Impact Assessment</li>
+                                <li>Renewable Energy Systems</li>
+                                <li>Post-Harvest Technology</li>
+                                <li>Sustainable Development</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Curriculum Details -->
+            <div class="row mt-4">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fas fa-book me-2"></i>Curriculum Breakdown</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">100 Level (Year 1)</h6>
+                                    <ul class="small">
+                                        <li>Calculus & Trigonometry</li>
+                                        <li>Thermodynamics and Mechanics</li>
+                                        <li>General Chemistry & Organic Chemistry</li>
+                                        <li>Technical Drawing</li>
+                                        <li>Introduction to Agric. Engineering</li>
+                                        <li>General Studies</li>
+                                        <li>Statistics</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">200 Level (Year 2)</h6>
+                                    <ul class="small">
+                                        <li>Ordinary Differential Equations</li>
+                                        <li>Thermodynamics & Mechanics</li>
+                                        <li>AutoCAD</li>
+                                        <li>Electricity & Fortran</li>
+                                        <li>Farm Mechanization & Structure</li>
+                                        <li>Abstract Mathematics</li>
+                                        <li>Strength of Materials</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">300 Level (Year 3)</h6>
+                                    <ul class="small">
+                                        <li>Fluid Mechanics</li>
+                                        <li>Thermodynamics</li>
+                                        <li>Agricultural Machinery I</li>
+                                        <li>Farm Surveying</li>
+                                        <li>Materials Science</li>
+                                        <li>Workshop Technology</li>
+                                        <li>Agricultural Economics</li>
+                                    </ul>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">400 Level (Year 4)</h6>
+                                    <ul class="small">
+                                        <li>Fluid Mechanics</li>
+                                        <li>Thermodynamics</li>
+                                        <li>Agricultural Machinery I</li>
+                                        <li>Farm Surveying</li>
+                                        <li>Materials Science</li>
+                                        <li>Workshop Technology</li>
+                                        <li>Agricultural Economics</li>
+                                    </ul>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">500 Level (Year 5)</h6>
+                                    <ul class="small">
+                                        <li>Fluid Mechanics</li>
+                                        <li>Thermodynamics</li>
+                                        <li>Agricultural Machinery I</li>
+                                        <li>Farm Surveying</li>
+                                        <li>Materials Science</li>
+                                        <li>Workshop Technology</li>
+                                        <li>Agricultural Economics</li>
+                                    </ul>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Academic Resources</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Access to learning materials and academic resources</p>
+            </div>
+            <div class="row">
+                <!-- Lecture Notes -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Lecture Notes</h5>
+                            <p class="card-text">Access comprehensive lecture notes for all courses</p>
+                            <div class="mt-3">
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">100 Level</a>
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">200 Level</a>
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">300 Level</a>
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">400 Level</a>
+                                <a href="#" class="btn btn-outline-primary btn-sm">500 Level</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+      
+            </div>
+            
+            <!-- Research Resources -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-microscope me-2"></i>Research Resources</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Laboratory Facilities:</h6>
+                            <ul>
+                                <li>Soil and Water Engineering Laboratory</li>
+                                <li>Agricultural Machinery Laboratory</li>
+                                <li>Food Process Engineering Laboratory</li>
+                                <li>Environmental Engineering Laboratory</li>
+                                <li>Computer Laboratory</li>
+                            </ul>
+                            <h6 class="mt-3">Software Tools:</h6>
+                            <ul>
+                                <li>AutoCAD for Engineering Design</li>
+                                <li>MATLAB for Data Analysis</li>
+                                <li>ArcGIS for Geographic Information Systems</li>
+                                <li>ANSYS for Simulation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Equipment & Facilities</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Major Equipment:</h6>
+                            <ul>
+                                <li>Tractors and Agricultural Implements</li>
+                                <li>Irrigation Systems and Components</li>
+                                <li>Food Processing Equipment</li>
+                                <li>Testing and Measurement Instruments</li>
+                                <li>Environmental Monitoring Devices</li>
+                            </ul>
+                            <h6 class="mt-3">Specialized Facilities:</h6>
+                            <ul>
+                                <li>Greenhouse Complex</li>
+                                <li>Workshop and Fabrication Area</li>
+                                <li>Demonstration Farm</li>
+                                <li>Conference and Seminar Halls</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News & Events Section -->
+    <section id="news" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">News & Events</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Stay updated with latest announcements and upcoming events</p>
+            </div>
+            <div class="row">
+                <!-- Recent News -->
+                <div class="col-lg-8 mb-4">
+                    <h4 class="mb-4 text-primary"><i class="fas fa-newspaper me-2"></i>Latest News</h4>
+                    
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center">
+                                    <div class="date-box">
+                                        <div class="date-day">15</div>
+                                        <div class="date-month">AUG</div>
+                                        <div class="date-year">2025</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                   
+                                    <img src="{{ url_for('static', filename='images/news/awar.jpg') }}" alt="Research Grant News" class="img-fluid rounded" style="width: 100%; height: 80px; object-fit: cover;">
+                                </div>
+
+
+                                  
+                                <div class="col-md-8" >
+                                    <h6 class="card-title">Awards & Academic Excellence</h6>
+                                    <p class="card-text small text-muted">The department has been awarded a ₦50 million research
+                                         grant for sustainable irrigation systems development in Northern Nigeria. This project
+                                         will focus on water-efficient technologies...  </p>
+                                    <span class="badge bg-success">Research</span>
+                                </div>      
+                            </div>
+                        </div>
+                    </div>
+                    
+
+
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center">
+                                    <div class="date-box">
+                                        <div class="date-day">10</div>
+                                        <div class="date-month">AUG</div>
+                                        <div class="date-year">2025</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                   
+                                    <img src="{{ url_for('static', filename='images/news/symp.jpg') }}" alt="Student Achievement News" class="img-fluid rounded" style="width: 100%; height: 80px; object-fit: cover;">
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="card-title">Student Achievement: International Conference</h6>
+                                    <p class="card-text small text-muted">Final year student [Student Name] presented research on "Smart Irrigation Systems" at the International Conference on Agricultural Engineering in Ghana...</p>
+                                    <span class="badge bg-info">Achievement</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center">
+                                    <div class="date-box">
+                                        <div class="date-day">05</div>
+                                        <div class="date-month">AUG</div>
+                                        <div class="date-year">2025</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                  
+                                    <img src="{{ url_for('static', filename='images/news/mach.jpg') }}" alt="Laboratory Equipment News" class="img-fluid rounded" style="width: 100%; height: 80px; object-fit: cover;">
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="card-title">New Laboratory Equipment Installation</h6>
+                                    <p class="card-text small text-muted">State-of-the-art soil testing equipment has been installed in our Soil and Water Engineering Laboratory, enhancing our research and teaching capabilities...</p>
+                                    <span class="badge bg-warning text-dark">Infrastructure</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events -->
+                <div class="col-lg-4 mb-4">
+                    <h4 class="mb-4 text-success"><i class="fas fa-calendar-alt me-2"></i>Upcoming Events</h4>
+                    
+                    <div class="card mb-3 shadow-sm border-success">
+                        <div class="card-body">
+                            <h6 class="card-title text-success">Guest Lecture Series</h6>
+                            <p class="card-text small"><strong>Date:</strong> August 25, 2025</p>
+                            <p class="card-text small"><strong>Time:</strong> 2:00 PM</p>
+                            <p class="card-text small"><strong>Topic:</strong> "Climate-Smart Agriculture Technologies"</p>
+                            <p class="card-text small"><strong>Speaker:</strong> Prof. [Guest Name], IITA</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3 shadow-sm border-info">
+                        <div class="card-body">
+                            <h6 class="card-title text-info">Industrial Training Workshop</h6>
+                            <p class="card-text small"><strong>Date:</strong> September 2-4, 2025</p>
+                            <p class="card-text small"><strong>Venue:</strong> Department Conference Hall</p>
+                            <p class="card-text small">Three-day workshop on modern agricultural machinery and maintenance for 400-level students.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3 shadow-sm border-warning">
+                        <div class="card-body">
+                            <h6 class="card-title text-warning">Research Symposium</h6>
+                            <p class="card-text small"><strong>Date:</strong> September 15, 2025</p>
+                            <p class="card-text small"><strong>Theme:</strong> "Sustainable Engineering for Food Security"</p>
+                            <p class="card-text small">Annual research symposium featuring faculty and student presentations.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3 shadow-sm border-danger">
+                        <div class="card-body">
+                            <h6 class="card-title text-danger">Alumni Homecoming</h6>
+                            <p class="card-text small"><strong>Date:</strong> October 10, 2025</p>
+                            <p class="card-text small"><strong>Event:</strong> Networking and mentorship program with recent graduates and industry professionals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Section -->
+    <section id="students" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Student Information</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Important information for current and prospective students</p>
+            </div>
+            <div class="row">
+                <!-- Academic Notices -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Academic Notices</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="notice-item mb-3 p-3 bg-light rounded">
+                                <h6 class="text-primary">2024/2025 First Semester Examination</h6>
+                                <p class="mb-1 small"><strong>Date:</strong> Starting December 2, 2025</p>
+                                <p class="mb-0 small">All students are advised to complete their course registrations before November 15, 2025.</p>
+                            </div>
+                            
+                            <div class="notice-item mb-3 p-3 bg-light rounded">
+                                <h6 class="text-success">Industrial Training (IT) Applications</h6>
+                                <p class="mb-1 small"><strong>Deadline:</strong> September 30, 2025</p>
+                                <p class="mb-0 small">400-level students should submit their IT placement letters to the departmental office.</p>
+                            </div>
+                            
+                            <div class="notice-item mb-3 p-3 bg-light rounded">
+                                <h6 class="text-warning">Final Year Project Proposals</h6>
+                                <p class="mb-1 small"><strong>Submission:</strong> October 1-15, 2025</p>
+                                <p class="mb-0 small">500-level students must submit their project proposals for approval.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Exam Schedule -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Examination Schedule</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-primary">2024/2025 First Semester</h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Course</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Dec 2</td>
+                                            <td>TAE 101</td>
+                                            <td>9:00 AM</td>
+                                        </tr>`
+                                        <tr>
+                                            <td>Dec 3</td>
+                                            <td>TAE 105</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 4</td>
+                                            <td>TAE 201</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 5</td>
+                                            <td>TAE 203</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 6</td>
+                                            <td>TAE 301</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 6</td>
+                                            <td>TAE 302</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 7</td>
+                                            <td>TAE 304</td>
+                                            <td>2:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 8</td>
+                                            <td>TAE 402</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 9</td>
+                                            <td>TAE 401</td>
+                                            <td>2:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 11</td>
+                                            <td>TAE 501</td>
+                                            <td>9:00 AM</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Note:</strong> Complete examination timetable will be posted on departmental notice board.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Internship and Career Info -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Internship & Career Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Industrial Training Partners</h6>
+                                    <ul>
+                                        <li>Nigerian Agricultural Development Corporation (NADC)</li>
+                                        <li>International Institute of Tropical Agriculture (IITA)</li>
+                                        <li>Federal Ministry of Agriculture and Rural Development</li>
+                                        <li>Flour Mills of Nigeria Plc</li>
+                                        <li>Olam Nigeria Limited</li>
+                                        <li>Various State Agricultural Development Programs (ADPs)</li>
+                                    </ul>
+                                    
+                                    <h6 class="text-success mt-4">IT Requirements</h6>
+                                    <ul>
+                                        <li>Minimum 6 months duration</li>
+                                        <li>Must be agriculture/engineering related</li>
+                                        <li>Submission of monthly reports</li>
+                                        <li>Final IT report and presentation</li>
+                                        <li>Supervisor's assessment</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Career Opportunities</h6>
+                                    <ul>
+                                        <li>Agricultural Engineer</li>
+                                        <li>Environmental Consultant</li>
+                                        <li>Irrigation Systems Designer</li>
+                                        <li>Food Process Engineer</li>
+                                        <li>Project Manager</li>
+                                        <li>Research Scientist</li>
+                                        <li>Government Technical Officer</li>
+                                    </ul>
+                                    
+                                    <h6 class="text-success mt-4">Professional Bodies</h6>
+                                    <ul>
+                                        <li>Nigerian Society of Engineers (NSE)</li>
+                                        <li>Council for the Regulation of Engineering in Nigeria (COREN)</li>
+                                        <li>Nigerian Institute of Agricultural Engineers (NIAE)</li>
+                                        <li>Nigerian Environmental Society</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Gallery</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Highlights from our department activities and achievements</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                       
+                        <img src="{{ url_for('static', filename='images/gallery/mach.jpg') }}" alt="Agricultural Machinery Lab" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">Agricultural Machinery Lab</h6>
+                            <p class="card-text small">Students working with modern agricultural equipment and machinery in our well-equipped laboratory.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                       
+                        <img src="{{ url_for('static', filename='images/gallery/green.jpg') }}" alt="Greenhouse Research" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">Greenhouse Research</h6>
+                            <p class="card-text small">Ongoing research on sustainable crop production and precision agriculture techniques.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                      
+                        <img src="{{ url_for('static', filename='images/gallery/grad.jpg') }}" alt="2024 Graduates" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">2024 Graduates</h6>
+                            <p class="card-text small">Celebrating the achievements of our graduating class of 2024 at the university convocation.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                        
+                        <img src="{{ url_for('static', filename='images/gallery/symp.jpg') }}" alt="Annual Symposium" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">Annual Symposium</h6>
+                            <p class="card-text small">Faculty and students presenting research findings at the annual departmental symposium.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                       
+                        <img src="{{ url_for('static', filename='images/gallery/irri.jpg') }}" alt="Irrigation System Installation" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">Irrigation System Installation</h6>
+                            <p class="card-text small">Students and faculty installing drip irrigation systems as part of practical training.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="gallery-item card shadow-sm">
+                    
+                        <img src="{{ url_for('static', filename='images/gallery/awar.jpg') }}" alt="Excellence Awards" class="gallery-placeholder" style="height: 250px; width: 100%; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">Excellence Awards</h6>
+                            <p class="card-text small">Department receiving recognition for outstanding contributions to agricultural engineering research.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Contact Us</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Get in touch with us for inquiries and assistance</p>
+            </div>
+            <div class="row">
+                <!-- Contact Information -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Contact Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="contact-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-building me-2"></i>Office Address</h6>
+                                <p class="mb-0">Department of Agricultural and Environmental Engineering<br>
+                                Faculty of Technology<br>
+                                University of Ibadan<br>
+                                Ibadan, Oyo State, Nigeria</p>
+                            </div>
+                            
+                            <div class="contact-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-phone me-2"></i>Phone Numbers</h6>
+                                <p class="mb-0">
+                                    <strong>Main Office:</strong> +234-903-576-2341<br>
+                                    <strong>HOD Office:</strong> +234-707-567-9856<br>
+                                    <strong>Admin Office:</strong> +234-810-835-7213
+                                </p>
+                            </div>
+                            
+                            <div class="contact-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-envelope me-2"></i>Email Addresses</h6>
+                                <p class="mb-0">
+                                    <strong>General Inquiries:</strong> info.agric@ui.edu.ng<br>
+                                    <strong>Admissions:</strong> admissions.agric@ui.edu.ng<br>
+                                    <strong>Research:</strong> research.agric@ui.edu.ng
+                                </p>
+                            </div>
+                            
+                            <div class="contact-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-clock me-2"></i>Office Hours</h6>
+                                <p class="mb-0">
+                                    <strong>Monday - Friday:</strong> 8:00 AM - 5:00 PM<br>
+                                    <strong>Saturday:</strong> 9:00 AM - 2:00 PM<br>
+                                    <strong>Sunday:</strong> Closed
+                                </p>
+                            </div>
+                            
+                            <div class="contact-item">
+                                <h6 class="text-primary"><i class="fas fa-share-alt me-2"></i>Social Media</h6>
+                                <div class="social-links">
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2"><i class="fab fa-facebook-f"></i> Facebook</a>
+                                    <a href="#" class="btn btn-outline-info btn-sm me-2"><i class="fab fa-twitter"></i> Twitter</a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Send us a Message</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('contact') }}" method="POST" id="contactForm">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="subject" name="subject" required>
+                                        <option value="">Choose a subject</option>
+                                        <option value="General Inquiry">General Inquiry</option>
+                                        <option value="Admissions">Admissions</option>
+                                        <option value="Research Collaboration">Research Collaboration</option>
+                                        <option value="Academic Programs">Academic Programs</option>
+                                        <option value="Student Support">Student Support</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Please provide details about your inquiry..."></textarea>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Contacts -->
+            <div class="row mt-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-phone-volume me-2"></i>Quick Contacts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
+                                        <h6>Head of Department</h6>
+                                        <p class="small mb-0">mo.omobowale@ui.edu.ng</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fas fa-user-graduate fa-2x text-success mb-2"></i>
+                                        <h6>Academic Office</h6>
+                                        <p class="small mb-0">academic.agric@ui.edu.ng</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fas fa-microscope fa-2x text-info mb-2"></i>
+                                        <h6>Research Coordinator</h6>
+                                        <p class="small mb-0">research.agric@ui.edu.ng</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
+                                        <h6>Technical Support</h6>
+                                        <p class="small mb-0">tech.agric@ui.edu.ng</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-success mb-3">Agricultural & Environmental Engineering</h5>
+                    <p class="small">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices at the University of Ibadan.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="text-success mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#about" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="#staff" class="text-light text-decoration-none">Faculty</a></li>
+                        <li><a href="#programs" class="text-light text-decoration-none">Programs</a></li>
+                        <li><a href="#resources" class="text-light text-decoration-none">Resources</a></li>
+                        <li><a href="#contact" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Academic Programs</h6>
+                    <ul class="list-unstyled small">
+                        <li>B.Eng Agricultural & Environmental Engineering</li>
+                        <li>M.Eng Agricultural & Environmental Engineering</li>
+                        <li>Ph.D Agricultural & Environmental Engineering</li>
+                        <li>Postgraduate Diploma Programs</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Contact Info</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Faculty of Technology, University of Ibadan
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        +234-xxx-xxx-xxxx
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        info.agric@ui.edu.ng
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="small mb-0">
+                        &copy; 2025 AEE 
+                        All rights reserved. | Designed with excellence for academic distinction. - Emmyfest
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
