@@ -3,5 +3,5 @@ Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.36
 Flask-Mail==0.9.1
 Werkzeug==3.0.3
-psycopg2==2.9.9
+psycopg==3.1.10
 gunicorn==23.0.0
