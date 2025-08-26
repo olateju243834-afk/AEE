@@ -21,7 +21,7 @@ class Contact(db.Model):
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
-    matric_number = db.Column(db.String(20), nullable=False, unique=True)
+    matric_number = db.Column(db.String(20), nullable=False, index=True)
     level = db.Column(db.Integer, nullable=False)
     email = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
