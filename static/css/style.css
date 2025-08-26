@@ -435,6 +435,76 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Target small iPhones and similar devices (up to 414px wide, covers iPhone 6/7/8 Plus and Xs Max) */
+@media (max-width: 414px) {
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+    
+    .navbar-brand .brand-title {
+        font-size: 0.9rem;
+    }
+    
+    .navbar-brand .brand-subtitle {
+        font-size: 0.65rem;
+    }
+    
+    .flash-messages {
+        right: 8px;
+        left: 8px;
+        max-width: none;
+        font-size: 0.85rem;
+    }
+}
+
+/* Target very small devices (like iPhone SE 1st gen - 320px width) */
+@media (max-width: 320px) {
+    .hero-section h1 {
+        font-size: 1.4rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .lead {
+        font-size: 0.95rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .navbar-brand .brand-title {
+        font-size: 0.8rem;
+    }
+    
+    .navbar-brand .brand-subtitle {
+        font-size: 0.6rem;
+    }
+    
+    .flash-messages {
+        right: 5px;
+        left: 5px;
+        font-size: 0.75rem;
+    }
+}
+
+
 /* Loading Animation */
 @keyframes fadeInUp {
     from {
