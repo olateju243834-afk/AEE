@@ -85,17 +85,17 @@ def index():
     return render_template('index.html')
 
 
-#@app.route('/students')
-#def students():
- #   return render_template('students.html')
+@app.route('/students')
+def students():
+    return render_template('students.html')
 
 @app.route('/news')
 def news():
     return render_template('news.html')
 
-@app.route('/staff')
-def staff():
-    return render_template('staff.html')
+#@app.route('/staff')
+#def staff():
+#    return render_template('staff.html')
 
 
 @app.route('/payment')
