@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undergraduate Academic Programs - Agricultural and Environmental Engineering</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar" data-bs-offset="100">
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC. & ENV ENGNR</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('staff') }}">Staff</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('academic_programs') }}">Academic Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('students') }}">Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news1') }}">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('payment') }}">Payment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center min-vh-75">
+                <div class="col-lg-8 mx-auto text-center">
+                    <div class="hero-content">
+                        <h1 class="display-4 fw-bold mb-4">Undergraduate Academic Programs</h1>
+                        <p class="lead mb-4">Comprehensive B.Eng Agricultural and Environmental Engineering Program designed to produce competent engineers for sustainable agricultural development.</p>
+                        <div class="hero-badges">
+                            <span class="badge bg-success fs-6 me-3"><i class="fas fa-graduation-cap me-2"></i>5-Year Program</span>
+                            <span class="badge bg-info fs-6 me-3"><i class="fas fa-certificate me-2"></i>COREN Accredited</span>
+                            <span class="badge bg-warning fs-6"><i class="fas fa-award me-2"></i>Industry Recognized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Program Overview -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <h2 class="section-title">B.Eng Agricultural and Environmental Engineering</h2>
+                    <div class="title-underline"></div>
+                    <p class="lead">A comprehensive 5-year undergraduate program that integrates engineering principles with agricultural and environmental sciences to address challenges in food production, environmental sustainability, and rural development.</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Duration</h5>
+                            <p class="card-text">5 Years (10 Semesters)<br>Plus 6 months SIWES</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Class Size</h5>
+                            <p class="card-text">Small class sizes for<br>personalized attention</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-award fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Accreditation</h5>
+                            <p class="card-text">Fully accredited by<br>COREN and NUC</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Structure by Level -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Course Structure by Level</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Detailed breakdown of courses from 100 Level to 500 Level</p>
+            </div>
+
+            <!-- 100 Level -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0"><i class="fas fa-book me-2"></i>100 Level - Foundation Year</h4>
+                            <small>Focus: Basic Sciences and Mathematics</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">First Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>MAT 111</td><td>Elementary Mathematics I</td><td>3</td></tr>
+                                            <tr><td>PHY 101</td><td>General Physics I</td><td>3</td></tr>
+                                            <tr><td>CHE 101</td><td>General Chemistry I</td><td>3</td></tr>
+                                            <tr><td>CSC 101</td><td>Introduction to Computer Science</td><td>3</td></tr>
+                                            <tr><td>TME 111</td><td>Engineering Drawing I</td><td>2</td></tr>
+                                            <tr><td>GES 101</td><td>Use of English I</td><td>2</td></tr>
+                                            <tr><td>GES 103</td><td>Nigerian People and Culture</td><td>2</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Second Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>MAT 112</td><td>Elementary Mathematics II</td><td>3</td></tr>
+                                            <tr><td>PHY 102</td><td>General Physics II</td><td>3</td></tr>
+                                            <tr><td>CHE 102</td><td>General Chemistry II</td><td>3</td></tr>
+                                            <tr><td>BIO 101</td><td>General Biology</td><td>3</td></tr>
+                                            <tr><td>TME 112</td><td>Engineering Drawing II</td><td>2</td></tr>
+                                            <tr><td>GES 102</td><td>Use of English II</td><td>2</td></tr>
+                                            <tr><td>GES 104</td><td>History and Philosophy of Science</td><td>2</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 200 Level -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-cogs me-2"></i>200 Level - Engineering Foundation</h4>
+                            <small>Focus: Basic Engineering Principles and Agricultural Introduction</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">First Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>MAT 201</td><td>Mathematical Methods I</td><td>3</td></tr>
+                                            <tr><td>PHY 201</td><td>Elementary Modern Physics</td><td>3</td></tr>
+                                            <tr><td>TME 201</td><td>Applied Mechanics I</td><td>3</td></tr>
+                                            <tr><td>TME 203</td><td>Strength of Materials I</td><td>3</td></tr>
+                                            <tr><td>TAE 201</td><td>Introduction to Agricultural Engineering</td><td>2</td></tr>
+                                            <tr><td>STA 201</td><td>Statistics for Engineers</td><td>3</td></tr>
+                                            <tr><td>ECE 201</td><td>Electrical Circuit Theory I</td><td>3</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Second Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>MAT 202</td><td>Mathematical Methods II</td><td>3</td></tr>
+                                            <tr><td>TME 202</td><td>Applied Mechanics II</td><td>3</td></tr>
+                                            <tr><td>TME 204</td><td>Strength of Materials II</td><td>3</td></tr>
+                                            <tr><td>TAE 202</td><td>Workshop Technology and Practice</td><td>2</td></tr>
+                                            <tr><td>TAE 212</td><td>Principles of Farm Mechanization</td><td>3</td></tr>
+                                            <tr><td>AGR 201</td><td>Introduction to Crop Production</td><td>2</td></tr>
+                                            <tr><td>ECE 202</td><td>Electrical Circuit Theory II</td><td>3</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 300 Level -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fas fa-tools me-2"></i>300 Level - Core Engineering</h4>
+                            <small>Focus: Agricultural Engineering Fundamentals</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">First Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 301</td><td>Fluid Mechanics</td><td>3</td></tr>
+                                            <tr><td>TAE 303</td><td>Thermodynamics</td><td>3</td></tr>
+                                            <tr><td>TAE 305</td><td>Soil Mechanics</td><td>3</td></tr>
+                                            <tr><td>TAE 307</td><td>Agricultural Machinery I</td><td>3</td></tr>
+                                            <tr><td>TAE 309</td><td>Farm Structures I</td><td>3</td></tr>
+                                            <tr><td>TAE 311</td><td>Agricultural Processing I</td><td>3</td></tr>
+                                            <tr><td>ECE 301</td><td>Electronics</td><td>3</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Second Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 302</td><td>Heat and Mass Transfer</td><td>3</td></tr>
+                                            <tr><td>TAE 304</td><td>Soil and Water Conservation I</td><td>3</td></tr>
+                                            <tr><td>TAE 306</td><td>Agricultural Materials</td><td>2</td></tr>
+                                            <tr><td>TAE 308</td><td>Agricultural Machinery II</td><td>3</td></tr>
+                                            <tr><td>TAE 310</td><td>Farm Structures II</td><td>3</td></tr>
+                                            <tr><td>TAE 312</td><td>Agricultural Processing II</td><td>3</td></tr>
+                                            <tr><td>GES 301</td><td>Engineering Economics</td><td>2</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 400 Level -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h4 class="mb-0"><i class="fas fa-industry me-2"></i>400 Level - Advanced Applications</h4>
+                            <small>Focus: Specialized Systems and Industrial Training</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">First Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 401</td><td>Instrumentation and Control</td><td>3</td></tr>
+                                            <tr><td>TAE 403</td><td>Irrigation Engineering</td><td>3</td></tr>
+                                            <tr><td>TAE 405</td><td>Environmental Engineering I</td><td>3</td></tr>
+                                            <tr><td>TAE 407</td><td>Power and Energy in Agriculture</td><td>3</td></tr>
+                                            <tr><td>TAE 409</td><td>Food Process Engineering I</td><td>3</td></tr>
+                                            <tr><td>TAE 411</td><td>Research Methods in Engineering</td><td>2</td></tr>
+                                            <tr><td>ENT 401</td><td>Entrepreneurship Studies</td><td>2</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Second Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 402</td><td>Drainage Engineering</td><td>3</td></tr>
+                                            <tr><td>TAE 404</td><td>Environmental Engineering II</td><td>3</td></tr>
+                                            <tr><td>TAE 406</td><td>Precision Agriculture</td><td>3</td></tr>
+                                            <tr><td>TAE 408</td><td>Food Process Engineering II</td><td>3</td></tr>
+                                            <tr><td>TAE 410</td><td>Project I</td><td>3</td></tr>
+                                            <tr><td>TAE 412</td><td>SIWES (Students Industrial Work Experience)</td><td>6</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 500 Level -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>500 Level - Specialization & Project</h4>
+                            <small>Focus: Advanced Topics and Final Year Project</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">First Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 501</td><td>Advanced Agricultural Machinery</td><td>3</td></tr>
+                                            <tr><td>TAE 503</td><td>Renewable Energy Systems</td><td>3</td></tr>
+                                            <tr><td>TAE 505</td><td>Post-Harvest Technology</td><td>3</td></tr>
+                                            <tr><td>TAE 507</td><td>Agricultural Robotics</td><td>3</td></tr>
+                                            <tr><td>TAE 509</td><td>Environmental Impact Assessment</td><td>3</td></tr>
+                                            <tr><td>TAE 511</td><td>Project II</td><td>6</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Second Semester</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Title</th>
+                                                <th>Units</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>TAE 502</td><td>Agricultural Systems Engineering</td><td>3</td></tr>
+                                            <tr><td>TAE 504</td><td>Smart Farming Technologies</td><td>3</td></tr>
+                                            <tr><td>TAE 506</td><td>Sustainable Agriculture</td><td>3</td></tr>
+                                            <tr><td>TAE 508</td><td>Professional Engineering Practice</td><td>2</td></tr>
+                                            <tr><td>TAE 510</td><td>Seminar</td><td>1</td></tr>
+                                            <tr><td>TAE 512</td><td>Project III (Final Project)</td><td>6</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Graduation Requirements -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0"><i class="fas fa-certificate me-2"></i>Graduation Requirements</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">Academic Requirements</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Minimum of 180 credit units</li>
+                                        <li class="list-group-item">Minimum CGPA of 1.50</li>
+                                        <li class="list-group-item">Successful completion of SIWES</li>
+                                        <li class="list-group-item">Satisfactory final year project</li>
+                                        <li class="list-group-item">No outstanding fees</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success mb-3">Professional Development</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Eligible for COREN registration</li>
+                                        <li class="list-group-item">Industry internship experience</li>
+                                        <li class="list-group-item">Research presentation skills</li>
+                                        <li class="list-group-item">Technical report writing</li>
+                                        <li class="list-group-item">Teamwork and leadership</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Career Prospects -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Career Prospects</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Our graduates pursue diverse career paths in various sectors</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-industry fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Engineering Consulting</h5>
+                            <p class="card-text">Design and consultation services for agricultural systems, irrigation projects, and environmental solutions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-seedling fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Agricultural Technology</h5>
+                            <p class="card-text">Development of smart farming solutions, precision agriculture systems, and agricultural machinery.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-leaf fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Environmental Engineering</h5>
+                            <p class="card-text">Environmental impact assessment, waste management, and sustainable development projects.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-success mb-3">Agricultural & Environmental Engineering</h5>
+                    <p class="small">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices at the University of Ibadan.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="text-success mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="{{ url_for('staff') }}" class="text-light text-decoration-none">Faculty</a></li>
+                        <li><a href="{{ url_for('academic_programs') }}" class="text-light text-decoration-none">Programs</a></li>
+                        <li><a href="{{ url_for('students') }}" class="text-light text-decoration-none">Students</a></li>
+                        <li><a href="{{ url_for('index') }}#contact" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Academic Programs</h6>
+                    <ul class="list-unstyled small">
+                        <li>B.Eng Agricultural & Environmental Engineering</li>
+                        <li>M.Eng Agricultural & Environmental Engineering</li>
+                        <li>Ph.D Agricultural & Environmental Engineering</li>
+                        <li>Postgraduate Diploma Programs</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Contact Info</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Faculty of Technology, University of Ibadan
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        +234-xxx-xxx-xxxx
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        info.agric@ui.edu.ng
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="small mb-0">
+                        &copy; 2025 Department of Agricultural and Environmental Engineering, University of Ibadan. 
+                        All rights reserved. | Designed with excellence for academic distinction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
