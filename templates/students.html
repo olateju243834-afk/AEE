@@ -1,0 +1,877 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information - Agricultural and Environmental Engineering</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar" data-bs-offset="100">
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC. & ENV ENGNR</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('payment') }}">Payment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('staff') }}">Staff</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('students') }}">Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news1') }}">Academic Programme</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Hero Section -->
+    <section style="background-image: url('/static/images/staticb.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;" class="hero-section">
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="row align-items-center min-vh-100">
+                    <div class="col-lg-8 mx-auto text-center text-white">
+                        <h1 class="display-3 fw-bold mb-4">Student Information Portal</h1>
+                        <p class="lead fs-4 mb-5">Your gateway to academic resources, examination updates, and student affairs</p>
+                        <div class="hero-badges">
+                            <span class="badge bg-success fs-6 me-3"><i class="fas fa-graduation-cap me-2"></i>Academic Excellence</span>
+                            <span class="badge bg-info fs-6 me-3"><i class="fas fa-calendar-alt me-2"></i>Updated Schedules</span>
+                            <span class="badge bg-warning fs-6"><i class="fas fa-users me-2"></i>Student Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Links Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Quick Access</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Essential student services and information</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Examination Timetable</h5>
+                            <p class="card-text">View current semester exam schedules and important dates</p>
+                            <a href="#exam-schedule" class="btn btn-primary">View Schedule</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-clipboard-list fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Academic Notices</h5>
+                            <p class="card-text">Stay updated with important announcements and notices</p>
+                            <a href="#notices" class="btn btn-success">View Notices</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-clock fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Class Timetable</h5>
+                            <p class="card-text">Access your weekly class schedules and venues</p>
+                            <a href="#class-timetable" class="btn btn-info">View Timetable</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-user-friends fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Student Affairs</h5>
+                            <p class="card-text">Connect with student support services and counseling</p>
+                            <a href="#student-affairs" class="btn btn-warning">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Academic Notices Section -->
+    <section id="notices" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Academic Notices & Updates</h2>
+                <div class="title-underline"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Important Notices</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="notice-item mb-4 p-3 border-start border-danger border-4 bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="text-danger mb-0">Second Semester Resumption - 2024/2025</h6>
+                                    <span class="badge bg-danger">New</span>
+                                </div>
+                                <p class="mb-2"><strong>Date:</strong> August 26, 2025</p>
+                                <p class="mb-0">All students are expected to resume for the second semester. Lectures commence immediately. Late registration attracts penalties.</p>
+                            </div>
+                            
+                            <div class="notice-item mb-4 p-3 border-start border-warning border-4 bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="text-warning mb-0">Final Year Project Defense Schedule</h6>
+                                    <span class="badge bg-warning">Urgent</span>
+                                </div>
+                                <p class="mb-2"><strong>Date:</strong> September 2-6, 2025</p>
+                                <p class="mb-0">500-level students must submit final project reports by August 30th. Defense schedule will be posted on the departmental notice board.</p>
+                            </div>
+                            
+                            <div class="notice-item mb-4 p-3 border-start border-info border-4 bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="text-info mb-0">Industrial Training (IT) Registration</h6>
+                                    <span class="badge bg-info">Reminder</span>
+                                </div>
+                                <p class="mb-2"><strong>Deadline:</strong> September 15, 2025</p>
+                                <p class="mb-0">400-level students must complete IT registration and submit placement letters. Contact the IT coordinator for assistance.</p>
+                            </div>
+
+                            <div class="notice-item mb-4 p-3 border-start border-success border-4 bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="text-success mb-0">Course Registration Portal</h6>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <p class="mb-2"><strong>Status:</strong> Open until September 30, 2025</p>
+                                <p class="mb-0">Course registration portal is now active. Students are advised to complete registration early to avoid last-minute rush.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Important Dates</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item mb-3">
+                                    <div class="timeline-date">Aug 26</div>
+                                    <div class="timeline-content">
+                                        <h6>Second Semester Begins</h6>
+                                        <p class="small text-muted">Lectures commence</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-3">
+                                    <div class="timeline-date">Aug 30</div>
+                                    <div class="timeline-content">
+                                        <h6>Project Report Submission</h6>
+                                        <p class="small text-muted">500L students deadline</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-3">
+                                    <div class="timeline-date">Sep 2-6</div>
+                                    <div class="timeline-content">
+                                        <h6>Project Defense Week</h6>
+                                        <p class="small text-muted">Final year presentations</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-3">
+                                    <div class="timeline-date">Sep 15</div>
+                                    <div class="timeline-content">
+                                        <h6>IT Registration Deadline</h6>
+                                        <p class="small text-muted">400L students</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-3">
+                                    <div class="timeline-date">Sep 30</div>
+                                    <div class="timeline-content">
+                                        <h6>Course Registration Ends</h6>
+                                        <p class="small text-muted">All levels</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Examination Schedule Section -->
+    <section id="exam-schedule" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Examination Timetable</h2>
+                <div class="title-underline"></div>
+                <p class="lead">2024/2025 Academic Session - Second Semester</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Second Semester Examination Schedule</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Course Code</th>
+                                            <th>Course Title</th>
+                                            <th>Level</th>
+                                            <th>Venue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Dec 2, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 212</td>
+                                            <td>Principles of Farm Mechanization</td>
+                                            <td>200L</td>
+                                            <td>LT 1, Faculty of Technology</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 3, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 312</td>
+                                            <td>Agricultural Processing Engineering I</td>
+                                            <td>300L</td>
+                                            <td>LT 2, Faculty of Technology</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 4, 2025</td>
+                                            <td>2:00 PM</td>
+                                            <td>TAE 412</td>
+                                            <td>Engineering Properties of Plants and Animal Materials</td>
+                                            <td>400L</td>
+                                            <td>AEE Conference Hall</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 5, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 514</td>
+                                            <td>Irrigation Engineering</td>
+                                            <td>500L</td>
+                                            <td>AEE Laboratory</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 6, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 315</td>
+                                            <td>Soil Mechanics for Agricultural Engineers</td>
+                                            <td>300L</td>
+                                            <td>LT 1, Faculty of Technology</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 7, 2025</td>
+                                            <td>2:00 PM</td>
+                                            <td>TAE 415</td>
+                                            <td>Hydraulics for Agricultural Engineers</td>
+                                            <td>400L</td>
+                                            <td>LT 2, Faculty of Technology</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 8, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 522</td>
+                                            <td>Agricultural Materials Handling</td>
+                                            <td>500L</td>
+                                            <td>AEE Conference Hall</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 9, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 414</td>
+                                            <td>Design of Agricultural Structures</td>
+                                            <td>400L</td>
+                                            <td>AEE Laboratory</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 10, 2025</td>
+                                            <td>2:00 PM</td>
+                                            <td>TAE 313</td>
+                                            <td>Farm Power and Maintenance I</td>
+                                            <td>300L</td>
+                                            <td>LT 1, Faculty of Technology</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 11, 2025</td>
+                                            <td>9:00 AM</td>
+                                            <td>TAE 515</td>
+                                            <td>Drainage Engineering</td>
+                                            <td>500L</td>
+                                            <td>AEE Conference Hall</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Examination Guidelines:</h6>
+                                    <ul class="mb-0">
+                                        <li>Students must arrive 30 minutes before exam time</li>
+                                        <li>Valid student ID is required for admission</li>
+                                        <li>Mobile phones and unauthorized materials are prohibited</li>
+                                        <li>Late arrival beyond 30 minutes will not be permitted</li>
+                                        <li>Examination results will be released within 4 weeks</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Class Timetable Section -->
+    <section id="class-timetable" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Class Timetable</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Weekly Class Schedule - Second Semester 2024/2025</p>
+            </div>
+            
+            <!-- Level Tabs -->
+            <ul class="nav nav-pills justify-content-center mb-4" id="levelTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="level200-tab" data-bs-toggle="pill" data-bs-target="#level200" type="button" role="tab">200 Level</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="level300-tab" data-bs-toggle="pill" data-bs-target="#level300" type="button" role="tab">300 Level</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="level400-tab" data-bs-toggle="pill" data-bs-target="#level400" type="button" role="tab">400 Level</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="level500-tab" data-bs-toggle="pill" data-bs-target="#level500" type="button" role="tab">500 Level</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="levelTabsContent">
+                <!-- 200 Level Timetable -->
+                <div class="tab-pane fade show active" id="level200" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">200 Level - Second Semester Timetable</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Monday</th>
+                                            <th>Tuesday</th>
+                                            <th>Wednesday</th>
+                                            <th>Thursday</th>
+                                            <th>Friday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>8:00-9:00</strong></td>
+                                            <td>TAE 212<br><small>Principles of Farm Mechanization</small><br><em>LT1</em></td>
+                                            <td>TME 212<br><small>Engineering Mechanics</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 213<br><small>Thermodynamics</small><br><em>LT1</em></td>
+                                            <td>TAE 214<br><small>Lab Session</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>9:00-10:00</strong></td>
+                                            <td>MAT 241<br><small>Ordinary Differential Equations</small><br><em>LT3</em></td>
+                                            <td>TAE 211<br><small>Intro to AEE</small><br><em>LT1</em></td>
+                                            <td>TME 211<br><small>AutoCAD</small><br><em>Computer Lab</em></td>
+                                            <td>-</td>
+                                            <td>TAE 214<br><small>Lab Session</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>10:00-11:00</strong></td>
+                                            <td>-</td>
+                                            <td>TAE 212<br><small>Principles of Farm Mechanization</small><br><em>LT1</em></td>
+                                            <td>TME 212<br><small>Engineering Mechanics</small><br><em>LT2</em></td>
+                                            <td>MAT 241<br><small>Ordinary Differential Equations</small><br><em>LT3</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>11:00-12:00</strong></td>
+                                            <td>TME 213<br><small>Thermodynamics</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 211<br><small>Intro to AEE</small><br><em>LT1</em></td>
+                                            <td>TME 211<br><small>AutoCAD</small><br><em>Computer Lab</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 300 Level Timetable -->
+                <div class="tab-pane fade" id="level300" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">300 Level - Second Semester Timetable</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Monday</th>
+                                            <th>Tuesday</th>
+                                            <th>Wednesday</th>
+                                            <th>Thursday</th>
+                                            <th>Friday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>8:00-9:00</strong></td>
+                                            <td>TAE 312<br><small>Agricultural Processing Engineering I</small><br><em>LT1</em></td>
+                                            <td>TAE 315<br><small>Soil Mechanics for Agricultural Engineers</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 314<br><small>Advanced Computer Programming</small><br><em>Computer Lab</em></td>
+                                            <td>TAE 316<br><small>Lab Session</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>9:00-10:00</strong></td>
+                                            <td>TAE 313<br><small>Farm Power and Maintenance I</small><br><em>LT1</em></td>
+                                            <td>TME 322<br><small>Mechanics of Machines</small><br><em>LT2</em></td>
+                                            <td>TAE 311<br><small>Soil and Water Conservation Engineering I</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                            <td>TAE 316<br><small>Lab Session</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>10:00-11:00</strong></td>
+                                            <td>-</td>
+                                            <td>TAE 312<br><small>Agricultural Processing Engineering I</small><br><em>LT1</em></td>
+                                            <td>TAE 314<br><small>Advanced Computer Programming</small><br><em>Computer Lab</em></td>
+                                            <td>TAE 310<br><small>Farm Buildings and Structures</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>11:00-12:00</strong></td>
+                                            <td>TAE 315<br><small>Soil Mechanics for Agricultural Engineers</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 313<br><small>Farm Power and Maintenance I</small><br><em>LT1</em></td>
+                                            <td>TME 322<br><small>Mechanics of Machines</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 400 Level Timetable -->
+                <div class="tab-pane fade" id="level400" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">400 Level - Second Semester Timetable</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Monday</th>
+                                            <th>Tuesday</th>
+                                            <th>Wednesday</th>
+                                            <th>Thursday</th>
+                                            <th>Friday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>8:00-9:00</strong></td>
+                                            <td>TAE 412<br><small>Engineering Properties of Plants and Animal Materials</small><br><em>LT1</em></td>
+                                            <td>TAE 415<br><small>Hydraulics for Agricultural Engineers</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 414<br><small>Design of Agricultural Structures</small><br><em>LT1</em></td>
+                                            <td>TAE 416<br><small>Lab/Project Work</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>9:00-10:00</strong></td>
+                                            <td>TAE 413<br><small>Farm Power and Maintenance II</small><br><em>LT1</em></td>
+                                            <td>MAT 351<br><small>Numerical Analysis</small><br><em>LT3</em></td>
+                                            <td>TAE 411<br><small>Hydrology for Agricultural Engineer</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                            <td>TAE 416<br><small>Lab/Project Work</small><br><em>AEE Lab</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>10:00-11:00</strong></td>
+                                            <td>-</td>
+                                            <td>TAE 412<br><small>Engineering Properties of Plants and Animal Materials</small><br><em>LT1</em></td>
+                                            <td>TAE 414<br><small>Design of Agricultural Structures</small><br><em>LT1</em></td>
+                                            <td>TAE 415<br><small>Hydraulics for Agricultural Engineers</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>11:00-12:00</strong></td>
+                                            <td>TAE 411<br><small>Hydrology for Agricultural Engineer</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                            <td>TAE 413<br><small>Farm Power and Maintenance II</small><br><em>LT1</em></td>
+                                            <td>MAT 351<br><small>Numerical Analysis</small><br><em>LT3</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 500 Level Timetable -->
+                <div class="tab-pane fade" id="level500" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">500 Level - Second Semester Timetable</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Monday</th>
+                                            <th>Tuesday</th>
+                                            <th>Wednesday</th>
+                                            <th>Thursday</th>
+                                            <th>Friday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>8:00-9:00</strong></td>
+                                            <td>TAE 521<br><small>Agricultural Machinery II</small><br><em>LT1</em></td>
+                                            <td>TAE 514<br><small>Irrigation Engineering</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                            <td>TAE 522<br><small>Agricultural Materials Handling</small><br><em>LT1</em></td>
+                                            <td>TAE 523<br><small>Project Work</small><br><em>Individual</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>9:00-10:00</strong></td>
+                                            <td>TAE 512<br><small>Soil and Water Conservation Engineering II</small><br><em>LT1</em></td>
+                                            <td>TAE 515<br><small>Drainage Engineering</small><br><em>LT2</em></td>
+                                            <td>TAE 511<br><small>Agricultural Machinery I</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                            <td>TAE 523<br><small>Project Work</small><br><em>Individual</em></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>10:00-11:00</strong></td>
+                                            <td>-</td>
+                                            <td>TAE 521<br><small>Agricultural Machinery II</small><br><em>LT1</em></td>
+                                            <td>TAE 513<br><small>Agricultural Processing Engineering II</small><br><em>LT1</em></td>
+                                            <td>TAE 514<br><small>Irrigation Engineering</small><br><em>LT2</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>11:00-12:00</strong></td>
+                                            <td>TAE 513<br><small>Agricultural Processing Engineering II</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                            <td>TAE 512<br><small>Soil and Water Conservation Engineering II</small><br><em>LT1</em></td>
+                                            <td>TAE 522<br><small>Agricultural Materials Handling</small><br><em>LT1</em></td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Affairs Section -->
+    <section id="student-affairs" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Student Affairs & Support Services</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Comprehensive support for your academic and personal development</p>
+            </div>
+            
+            <div class="row">
+                <!-- Academic Support -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Academic Support Services</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="support-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-chalkboard-teacher me-2"></i>Academic Counseling</h6>
+                                <p class="small mb-2">Get guidance on course selection, academic planning, and career development.</p>
+                                <p class="small text-muted"><strong>Contact:</strong> Dr. H. A. Alabi - ha.alabi@ui.edu.ng</p>
+                            </div>
+                            
+                            <div class="support-item mb-4">
+                                <h6 class="text-success"><i class="fas fa-users me-2"></i>Peer Tutoring Program</h6>
+                                <p class="small mb-2">Connect with senior students for additional academic support and mentoring.</p>
+                                <p class="small text-muted"><strong>Coordinator:</strong> Student Affairs Office</p>
+                            </div>
+                            
+                            <div class="support-item mb-4">
+                                <h6 class="text-info"><i class="fas fa-laptop me-2"></i>Computer Lab Access</h6>
+                                <p class="small mb-2">24/7 access to computer laboratory for research and assignments.</p>
+                                <p class="small text-muted"><strong>Location:</strong> AEE Building, Ground Floor</p>
+                            </div>
+                            
+                            <div class="support-item">
+                                <h6 class="text-warning"><i class="fas fa-book me-2"></i>Library Resources</h6>
+                                <p class="small mb-2">Access to specialized agricultural engineering books and journals.</p>
+                                <p class="small text-muted"><strong>Hours:</strong> Mon-Fri 8AM-6PM, Sat 9AM-2PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Support -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Personal Support Services</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="support-item mb-4">
+                                <h6 class="text-primary"><i class="fas fa-user-md me-2"></i>Counseling Services</h6>
+                                <p class="small mb-2">Professional counseling for personal, academic, and career-related challenges.</p>
+                                <p class="small text-muted"><strong>Contact:</strong> University Counseling Center</p>
+                            </div>
+                            
+                            <div class="support-item mb-4">
+                                <h6 class="text-success"><i class="fas fa-medkit me-2"></i>Health Services</h6>
+                                <p class="small mb-2">On-campus health center providing medical care and health education.</p>
+                                <p class="small text-muted"><strong>Location:</strong> University Health Center</p>
+                            </div>
+                            
+                            <div class="support-item mb-4">
+                                <h6 class="text-info"><i class="fas fa-money-bill-wave me-2"></i>Financial Aid</h6>
+                                <p class="small mb-2">Information about scholarships, grants, and financial assistance programs.</p>
+                                <p class="small text-muted"><strong>Contact:</strong> Student Financial Services</p>
+                            </div>
+                            
+                            <div class="support-item">
+                                <h6 class="text-warning"><i class="fas fa-home me-2"></i>Accommodation Services</h6>
+                                <p class="small mb-2">Assistance with on-campus and off-campus housing arrangements.</p>
+                                <p class="small text-muted"><strong>Contact:</strong> Accommodation Office</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Organizations -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Student Organizations & Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Department Student Association (AEE Students)</h6>
+                                    <p class="small">Official student body representing all AEE students. Organizes academic and social activities.</p>
+                                    <p class="small text-muted"><strong>President:</strong> [Student Name] - Contact via departmental office</p>
+                                    
+                                    <h6 class="text-success mt-4">Professional Society (NIAE Student Chapter)</h6>
+                                    <p class="small">Student chapter of Nigerian Institute of Agricultural Engineers promoting professional development.</p>
+                                    <p class="small text-muted"><strong>Coordinator:</strong> Prof. A. I. Bamgboye</p>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6 class="text-warning">Engineering Students Society</h6>
+                                    <p class="small">Inter-departmental engineering society fostering collaboration and innovation.</p>
+                                    <p class="small text-muted"><strong>Faculty Advisor:</strong> Engineering Faculty</p>
+                                    
+                                    <h6 class="text-info mt-4">Research & Innovation Club</h6>
+                                    <p class="small">Student-led research initiatives and innovation projects in agricultural engineering.</p>
+                                    <p class="small text-muted"><strong>Meetings:</strong> Every Friday 4PM, AEE Conference Hall</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources & Downloads Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Academic Resources & Downloads</h2>
+                <div class="title-underline"></div>
+                <p class="lead">Essential documents and resources for your academic journey</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                            <h5 class="card-title">Course Handbooks</h5>
+                            <p class="card-text">Download comprehensive course handbooks and syllabi for all levels.</p>
+                            <div class="btn-group-vertical w-100">
+                                <a href="#" class="btn btn-outline-primary btn-sm mb-2">200 Level Handbook</a>
+                                <a href="#" class="btn btn-outline-success btn-sm mb-2">300 Level Handbook</a>
+                                <a href="#" class="btn btn-outline-info btn-sm mb-2">400 Level Handbook</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm">500 Level Handbook</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Forms & Documents</h5>
+                            <p class="card-text">Access important forms and official documents.</p>
+                            <div class="btn-group-vertical w-100">
+                                <a href="#" class="btn btn-outline-primary btn-sm mb-2">Course Registration Form</a>
+                                <a href="#" class="btn btn-outline-success btn-sm mb-2">IT Registration Form</a>
+                                <a href="#" class="btn btn-outline-info btn-sm mb-2">Project Proposal Form</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm">Transcript Request</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-download fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Academic Calendar</h5>
+                            <p class="card-text">Download the complete academic calendar with important dates.</p>
+                            <div class="btn-group-vertical w-100">
+                                <a href="#" class="btn btn-outline-primary btn-sm mb-2">2024/2025 Calendar</a>
+                                <a href="#" class="btn btn-outline-success btn-sm mb-2">Exam Schedule</a>
+                                <a href="#" class="btn btn-outline-info btn-sm mb-2">Holiday Calendar</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm">IT Period Schedule</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-success mb-3">Agricultural & Environmental Engineering</h5>
+                    <p class="small">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices at the University of Ibadan.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="text-success mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="{{ url_for('staff') }}" class="text-light text-decoration-none">Faculty</a></li>
+                        <li><a href="{{ url_for('payment') }}" class="text-light text-decoration-none">Payment</a></li>
+                        <li><a href="{{ url_for('news1') }}" class="text-light text-decoration-none">Academic Programme</a></li>
+                        <li><a href="{{ url_for('index') }}#contact" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Student Services</h6>
+                    <ul class="list-unstyled small">
+                        <li>Academic Counseling</li>
+                        <li>Course Registration</li>
+                        <li>Examination Services</li>
+                        <li>Student Affairs</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Contact Info</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Faculty of Technology, University of Ibadan
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        +234-903-576-2341
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        info.agric@ui.edu.ng
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="small mb-0">
+                        &copy; 2025 AEE 
+                        All rights reserved. | Designed with excellence for academic distinction. - Emmyfest
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
