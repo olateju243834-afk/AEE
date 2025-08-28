@@ -89,6 +89,10 @@ def index():
 def news1():
     return render_template('news1.html')
 
+@app.route('/news')
+def news():
+    return render_template('news.html')
+
 
 @app.route('/payment')
 def payment():
