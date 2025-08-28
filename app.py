@@ -93,9 +93,9 @@ def students():
 def news():
     return render_template('news.html')
 
-#@app.route('/staff')
-#def staff():
-#    return render_template('staff.html')
+@app.route('/staff')
+def staff():
+    return render_template('staff.html')
 
 
 @app.route('/payment')
