@@ -106,6 +106,10 @@ def staff():
 def payment():
     return render_template('payment.html')
 
+@app.route('/academic_program')
+def academic_program():
+    return render_template('academic_program.html')
+
 
 @app.route('/contact', methods=['POST'])
 def contact():
