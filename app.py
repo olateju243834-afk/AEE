@@ -85,10 +85,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/news1')
-def news1():
-    return render_template('news1.html')
-
 @app.route('/students')
 def students():
     return render_template('students.html')
