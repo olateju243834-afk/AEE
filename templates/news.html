@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News & Blog - Agricultural and Environmental Engineering</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{url_for('index')}}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Department Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
+                <div>
+                    <div class="brand-title">AGRIC. & ENV ENGNR</div>
+                    <div class="brand-subtitle">University of Ibadan</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#staff">Staff</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#programs">Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#resources">Resources</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{url_for('news')}}">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#students">Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('payment')}}">Payment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('index')}}#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- News Header Section -->
+    <section class="bg-primary text-white py-5" >
+        <div class="container"`>
+            <div class="row" >
+                <div class="col-lg-8 mx-auto text-center" >
+                    <h1 class="display-4 fw-bold mb-4">Department News & Blog</h1>
+                    <p class="lead">Stay updated with the latest news, research developments, and announcements from the Department of Agricultural and Environmental Engineering.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main News Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Featured Post -->
+                    <article class="card shadow-sm mb-5">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0"><i class="fas fa-star me-2"></i>Featured Post</h5>
+                        </div>
+                        <img src="{{ url_for('static', filename='images/news/symp.jpg') }}" class="card-img-top" alt="Featured News" style="height: 300px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary">Research</span>
+                                <small class="text-muted"><i class="fas fa-calendar me-1"></i>January 15, 2025</small>
+                            </div>
+                            <h3 class="card-title">International Symposium on Sustainable Agriculture Engineering</h3>
+                            <p class="card-text">Our department successfully hosted the International Symposium on Sustainable Agriculture Engineering, bringing together researchers, industry experts, and students from across West Africa. The event featured groundbreaking research presentations on precision agriculture, renewable energy in farming, and climate-smart agricultural technologies.</p>
+                            <p class="card-text">Key highlights included the unveiling of our new IoT-based irrigation monitoring system and partnerships with leading agricultural technology companies for student internships and research collaborations.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By Prof. Agricultural Engineering Team</small>
+                                <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Recent Posts -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-success">Recent News</h2>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-success btn-sm active">All</button>
+                            <button type="button" class="btn btn-outline-success btn-sm">Research</button>
+                            <button type="button" class="btn btn-outline-success btn-sm">Events</button>
+                            <button type="button" class="btn btn-outline-success btn-sm">Students</button>
+                        </div>
+                    </div>
+
+                    <!-- News Post 1 -->
+                    <article class="card shadow-sm mb-4">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ url_for('static', filename='images/news/mach.jpg') }}" class="img-fluid rounded-start h-100" alt="Laboratory Equipment" style="object-fit: cover;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-warning text-dark">Infrastructure</span>
+                                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>January 10, 2025</small>
+                                    </div>
+                                    <h5 class="card-title">New Laboratory Equipment Installation</h5>
+                                    <p class="card-text">State-of-the-art soil testing equipment has been installed in our Soil and Water Engineering Laboratory. This enhancement will significantly improve our research capabilities and provide students with hands-on experience using modern agricultural engineering tools.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">By Dr. Laboratory Manager</small>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- News Post 2 -->
+                    <article class="card shadow-sm mb-4">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ url_for('static', filename='images/news/awar.jpg') }}" class="img-fluid rounded-start h-100" alt="Awards" style="object-fit: cover;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-success">Achievement</span>
+                                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>December 28, 2024</small>
+                                    </div>
+                                    <h5 class="card-title">Students Win National Engineering Competition</h5>
+                                    <p class="card-text">Our final year students have won the National Agricultural Engineering Design Competition with their innovative automated irrigation system. The project demonstrates the practical application of precision agriculture principles learned in our program.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">By Student Affairs Office</small>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- News Post 3 -->
+                    <article class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-info">Research</span>
+                                <small class="text-muted"><i class="fas fa-calendar me-1"></i>December 20, 2024</small>
+                            </div>
+                            <h5 class="card-title">New Research Grant for Climate-Smart Agriculture</h5>
+                            <p class="card-text">The department has been awarded a ₦50 million research grant from the Nigerian Agricultural Research Council to develop climate-smart agriculture solutions. The three-year project will focus on developing drought-resistant farming techniques and renewable energy solutions for rural farming communities.</p>
+                            <p class="card-text">This research aligns with our commitment to addressing climate change challenges in agriculture while promoting sustainable farming practices across Nigeria.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By Research Coordination Unit</small>
+                                <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- News Post 4 -->
+                    <article class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-secondary">Events</span>
+                                <small class="text-muted"><i class="fas fa-calendar me-1"></i>December 15, 2024</small>
+                            </div>
+                            <h5 class="card-title">Industry Partnership Workshop</h5>
+                            <p class="card-text">A successful workshop on "Industry-Academia Collaboration in Agricultural Engineering" was held with representatives from leading agricultural machinery companies. The event resulted in new internship opportunities and potential research partnerships for our students and faculty.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By Industry Liaison Office</small>
+                                <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Pagination -->
+                    <nav aria-label="News pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            <li class="page-item active">
+                                <span class="page-link">1</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Search -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="card-title mb-0"><i class="fas fa-search me-2"></i>Search News</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search articles...">
+                                <button class="btn btn-outline-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="card-title mb-0"><i class="fas fa-tags me-2"></i>Categories</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Research <span class="badge bg-light text-dark float-end">12</span></a></li>
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Student Activities <span class="badge bg-light text-dark float-end">8</span></a></li>
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Faculty News <span class="badge bg-light text-dark float-end">6</span></a></li>
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Infrastructure <span class="badge bg-light text-dark float-end">4</span></a></li>
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Events <span class="badge bg-light text-dark float-end">15</span></a></li>
+                                <li class="mb-2"><a href="#" class="text-decoration-none">Awards <span class="badge bg-light text-dark float-end">3</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Recent Posts -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="card-title mb-0"><i class="fas fa-clock me-2"></i>Recent Posts</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex mb-3">
+                                <img src="{{ url_for('static', filename='images/gallery/green.jpg') }}" alt="Recent post" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-1"><a href="#" class="text-decoration-none">Green Technology Initiative</a></h6>
+                                    <small class="text-muted">Jan 8, 2025</small>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-3">
+                                <img src="{{ url_for('static', filename='images/gallery/irri.jpg') }}" alt="Recent post" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-1"><a href="#" class="text-decoration-none">Smart Irrigation Project</a></h6>
+                                    <small class="text-muted">Jan 5, 2025</small>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <img src="{{ url_for('static', filename='images/gallery/grad.jpg') }}" alt="Recent post" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-1"><a href="#" class="text-decoration-none">Graduation Ceremony 2024</a></h6>
+                                    <small class="text-muted">Dec 30, 2024</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Newsletter Signup -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="card-title mb-0"><i class="fas fa-envelope me-2"></i>Newsletter</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text small">Subscribe to our newsletter to get the latest updates and announcements.</p>
+                            <form>
+                                <div class="mb-3">
+                                    <input type="email" class="form-control" placeholder="Your email address">
+                                </div>
+                                <button type="submit" class="btn btn-info w-100">Subscribe</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-success mb-3">Agricultural & Environmental Engineering</h5>
+                    <p class="small">Pioneering sustainable solutions for agriculture and environment through innovative engineering practices at the University of Ibadan.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="text-success mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{{url_for('index')}}#about" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="{{url_for('index')}}#staff" class="text-light text-decoration-none">Faculty</a></li>
+                        <li><a href="{{url_for('index')}}#programs" class="text-light text-decoration-none">Programs</a></li>
+                        <li><a href="{{url_for('index')}}#resources" class="text-light text-decoration-none">Resources</a></li>
+                        <li><a href="{{url_for('index')}}#contact" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Academic Programs</h6>
+                    <ul class="list-unstyled small">
+                        <li>B.Eng Agricultural & Environmental Engineering</li>
+                        <li>M.Eng Agricultural & Environmental Engineering</li>
+                        <li>Ph.D Agricultural & Environmental Engineering</li>
+                        <li>Postgraduate Diploma Programs</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-success mb-3">Contact Info</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Faculty of Technology, University of Ibadan
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        +234-xxx-xxx-xxxx
+                    </p>
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        info.agric@ui.edu.ng
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="small mb-0">
+                        &copy; 2025 Department of Agricultural and Environmental Engineering, University of Ibadan. 
+                        All rights reserved. | Designed with excellence for academic distinction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
