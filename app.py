@@ -2,7 +2,7 @@ import os
 import logging
 import json
 from datetime import datetime
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify,session
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from models import db, Contact, Payment
@@ -83,6 +83,54 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/stats')
+def stats():
+    stats = (
+        db.session.query(
+            db.func.to_char(Payment.created_at, 'YYYY-MM'),
+            db.func.count(Payment.id).label('count'),
+            db.func.sum(Payment.total_amount).label('total')
+        )
+        .group_by('month')
+        .order_by('month')
+        .all()
+    )
+
+    data = {
+        "labels": [row.month for row in stats],
+        "counts": [row.count for row in stats],
+        "totals": [float(row.total or 0) for row in stats],
+    }
+
+    return jsonify(data)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == os.environ.get('ADMIN_PASSWORD'):
+            session['is_admin'] = True
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid password', 'error')
+    return render_template('admin.html')
+
+
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('is_admin'):
+        return redirect(url_for('admin'))
+
+    payments = Payment.query.all()
+    return render_template('dashboard.html', payments=payments)
+
+
+@app.route('/uploads/receipts/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 
 @app.route('/students')
