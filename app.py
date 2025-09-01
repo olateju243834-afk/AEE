@@ -119,9 +119,12 @@ def admin():
 
 
 @app.route('/dashboard')
-def dashboard():
+def admin_dashboard():
     if not session.get('is_admin'):
         return redirect(url_for('admin'))
+    payments = Payment.query.all()
+    return render_template('admin_dashboard.html', payments=payments)
+
 
     payments = Payment.query.all()
     return render_template('admin_dashboard.html', payments=payments)
