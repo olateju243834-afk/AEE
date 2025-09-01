@@ -124,7 +124,7 @@ def dashboard():
         return redirect(url_for('admin'))
 
     payments = Payment.query.all()
-    return render_template('dashboard.html', payments=payments)
+    return render_template('admin_dashboard.html', payments=payments)
 
 
 @app.route('/uploads/receipts/<filename>')
