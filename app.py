@@ -108,9 +108,9 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def index():
     return render_template('index.html')
 
-@app.route('/news1')
-def news1():
-    return render_template('news1.html')
+@app.route('/staff')
+def staff():
+    return render_template('staff.html')
 
 @app.route('/news')
 def news():
