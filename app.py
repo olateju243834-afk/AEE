@@ -120,6 +120,10 @@ def students():
 def staff():
     return render_template('staff.html')
 
+@app.route('/academic_program')
+def academic_program():
+    return render_template('academic_program.html')
+
 @app.route('/news')
 def news():
     return render_template('news.html')
