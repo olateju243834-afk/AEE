@@ -508,33 +508,32 @@ def admin_stats():
         db.func.sum(Payment.total_amount)
     ).group_by(Payment.status).all()
 
-    # Monthly payment trends (SQLite-safe)
-month_expr = db.func.to_char(Payment.created_at, 'YYYY-MM').label('month')
-monthly_stats_raw = db.session.query(
-    month_expr,
-    db.func.count(Payment.id).label('count'),
-    db.func.sum(Payment.total_amount).label('total')
-).group_by(month_expr).order_by(month_expr).all()
-
+    # Monthly payment trends (Postgres only; for SQLite use strftime instead of to_char)
+    month_expr = db.func.to_char(Payment.created_at, 'YYYY-MM').label('month')
+    monthly_stats_raw = db.session.query(
+        month_expr,
+        db.func.count(Payment.id).label('count'),
+        db.func.sum(Payment.total_amount).label('total')
+    ).group_by(month_expr).order_by(month_expr).all()
 
     # Format months for display
-import calendar
-monthly_stats = []
-for row in monthly_stats_raw:
+    import calendar
+    monthly_stats = []
+    for row in monthly_stats_raw:
         if row[0]:
             year, month = map(int, row[0].split('-'))
-            label = f"{calendar.month_name[month]} {year}"  # e.g., August 2025
+            label = f"{calendar.month_name[month]} {year}"
         else:
             label = "Unknown"
         monthly_stats.append((label, row[1], row[2]))
 
+    # ✅ This return must align with other indented code in the function
     return render_template(
         'admin_stats.html',
         level_stats=level_stats,
         status_stats=status_stats,
         monthly_stats=monthly_stats
     )
-
 
 
 # --------------------------------------------------------
