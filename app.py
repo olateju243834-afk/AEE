@@ -108,6 +108,11 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def index():
     return render_template('index.html')
 
+@app.route('/students')
+def students():
+    return render_template('students.html')
+
+
 @app.route('/staff')
 def staff():
     return render_template('staff.html')
