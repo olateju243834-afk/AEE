@@ -77,6 +77,9 @@ mail = Mail(app)
 # --------------------------------------------------------
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH')
+if not ADMIN_PASSWORD_HASH:
+    ADMIN_PASSWORD_HASH = generate_password_hash("admin123")
+
 
 def admin_required(f):
     @functools.wraps(f)
