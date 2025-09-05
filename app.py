@@ -304,7 +304,7 @@ def submit_payment():
 # --------------------------------------------------------
 # Admin Routes
 # --------------------------------------------------------
-@app.route('/admin')
+@app.route('/admin', endpoint="admin")
 @app.route('/admin-access')
 def admin_login():
     if 'admin_logged_in' in session:
