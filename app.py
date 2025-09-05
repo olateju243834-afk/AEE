@@ -518,9 +518,9 @@ monthly_stats_raw = db.session.query(
 
 
     # Format months for display
-    import calendar
-    monthly_stats = []
-    for row in monthly_stats_raw:
+import calendar
+monthly_stats = []
+for row in monthly_stats_raw:
         if row[0]:
             year, month = map(int, row[0].split('-'))
             label = f"{calendar.month_name[month]} {year}"  # e.g., August 2025
