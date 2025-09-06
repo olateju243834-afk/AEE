@@ -304,26 +304,28 @@ def submit_payment():
 # --------------------------------------------------------
 # Admin Routes
 # --------------------------------------------------------
-@app.route('/admin', endpoint="admin")
-@app.route('/admin-access')
+# Admin login (GET + POST in one route)
+@app.route('/admin', methods=['GET', 'POST'])
+@app.route('/admin-access', methods=['GET', 'POST'])
 def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
+            session['admin_logged_in'] = True
+            session['admin_username'] = username
+            flash('Login successful!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Invalid credentials!', 'error')
+            return redirect(url_for('admin_login'))
+
+    # Handle GET request (show login page or redirect if already logged in)
     if 'admin_logged_in' in session:
         return redirect(url_for('admin_dashboard'))
     return render_template('admin_login.html')
 
-@app.route('/admin/login', methods=['POST'])
-def admin_login_post():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-        session['admin_logged_in'] = True
-        session['admin_username'] = username
-        flash('Login successful!', 'success')
-        return redirect(url_for('admin_dashboard'))
-    else:
-        flash('Invalid credentials!', 'error')
-        return redirect(url_for('admin_login'))
 
 @app.route('/logout')
 def admin_logout():
