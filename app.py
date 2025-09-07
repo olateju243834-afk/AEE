@@ -131,27 +131,6 @@ def news():
 @app.route('/payment')
 def payment():
     return render_template('payment.html')
-
-#recent change
-@app.route('/admin', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            session['admin_logged_in'] = True
-            session['admin_username'] = username
-            flash('Login successful!', 'success')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Invalid credentials!', 'error')
-    
-    if 'admin_logged_in' in session:
-        return redirect(url_for('admin_dashboard'))
-    return render_template('admin_login.html')
-
-
 @app.route('/contact', methods=['POST'])
 def contact():
     try:
