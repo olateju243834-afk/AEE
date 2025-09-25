@@ -2699,3 +2699,270 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+
+//New
+
+// University of Ibadan Agricultural and Environmental Engineering Portal
+// Main JavaScript functionality
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize common functionality
+    initializeAlerts();
+    initializeFormsValidation();
+    initializeMobileMenu();
+});
+
+// Alert management
+function initializeAlerts() {
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+}
+
+// Form validation
+function initializeFormsValidation() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm(form)) {
+                e.preventDefault();
+            }
+        });
+    });
+}
+
+function validateForm(form) {
+    let isValid = true;
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            showFieldError(field, 'This field is required');
+            isValid = false;
+        } else {
+            clearFieldError(field);
+        }
+    });
+    
+    // Specific validations
+    const emailFields = form.querySelectorAll('input[type="email"]');
+    emailFields.forEach(field => {
+        if (field.value && !isValidEmail(field.value)) {
+            showFieldError(field, 'Please enter a valid email address');
+            isValid = false;
+        }
+    });
+    
+    const phoneFields = form.querySelectorAll('input[type="tel"]');
+    phoneFields.forEach(field => {
+        if (field.value && !isValidPhone(field.value)) {
+            showFieldError(field, 'Please enter a valid phone number');
+            isValid = false;
+        }
+    });
+    
+    return isValid;
+}
+
+function showFieldError(field, message) {
+    clearFieldError(field);
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error text-danger';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '0.25rem';
+    errorDiv.textContent = message;
+    
+    field.parentNode.appendChild(errorDiv);
+    field.style.borderColor = '#dc3545';
+}
+
+function clearFieldError(field) {
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    field.style.borderColor = '';
+}
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+    const phoneRegex = /^[\+]?[0-9\-\s\(\)]{10,}$/;
+    return phoneRegex.test(phone);
+}
+
+// Mobile menu functionality
+function initializeMobileMenu() {
+    // Handle responsive navigation
+    const navTabs = document.querySelector('.nav-tabs');
+    if (navTabs) {
+        // Add scroll indicators for mobile
+        if (navTabs.scrollWidth > navTabs.clientWidth) {
+            navTabs.classList.add('scrollable');
+        }
+    }
+}
+
+//Analytics
+
+
+
+
+// Utility functions for admin dashboard
+function toggleStudentStatus(studentId, isActive) {
+    fetch('/admin/toggle-student-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: studentId, is_active: !isActive })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadStudents(); // refresh the student table
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error toggling student status:', error);
+    });
+}
+
+
+function deleteResult(resultId) {
+    if (confirm('Are you sure you want to delete this result? This action cannot be undone.')) {
+        fetch('/admin/delete-result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ result_id: resultId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+            else alert('Error: ' + data.message);
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('An error occurred. Please try again.');
+        });
+    }
+}
+
+// Grade calculation utility
+function calculateGradePoints(score, level) {
+    if (level === 100) {
+        if (score >= 70) return 5.0;
+        else if (score >= 60) return 4.0;
+        else if (score >= 50) return 3.0;
+        else if (score >= 45) return 2.0;
+        else if (score >= 40) return 1.0;
+        else return 0.0;
+    } else {
+        if (score >= 70) return 4.0;
+        else if (score >= 60) return 3.0;
+        else if (score >= 50) return 2.0;
+        else if (score >= 45) return 1.0;
+        else return 0.0;
+    }
+}
+
+function getLetterGrade(score) {
+    if (score >= 70) return 'A';
+    else if (score >= 60) return 'B';
+    else if (score >= 50) return 'C';
+    else if (score >= 45) return 'D';
+    else if (score >= 40) return 'E';
+    else return 'F';
+}
+
+// Result preview for manual entry
+function previewResult() {
+    const score = parseInt(document.getElementById('score').value);
+    const level = parseInt(document.getElementById('student_select').selectedOptions[0]?.dataset.level || 200);
+
+    if (!isNaN(score) && score >= 0 && score <= 100) {
+        const grade = getLetterGrade(score);
+        const points = calculateGradePoints(score, level);
+        const preview = document.getElementById('result-preview');
+
+        if (preview) {
+            preview.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Preview:</strong> Score: ${score} | Grade: ${grade} | Points: ${points.toFixed(2)}
+                    (${level === 100 ? '5.0' : '4.0'} scale)
+                </div>
+            `;
+        }
+    }
+}
+
+// Loading states
+function showLoading(element) {
+    element.innerHTML = '<div class="text-center"><div class="loading"></div> Loading...</div>';
+}
+
+// Format numbers
+function formatCGPA(cgpa) {
+    return parseFloat(cgpa).toFixed(2);
+}
+
+
+function printElement(elementId, studentName, matricNumber, level, cgpa) {
+    const element = document.getElementById(elementId);
+    const table = element.querySelector('table'); // pick only the table
+    const printWindow = window.open('', '', 'height=600,width=800');
+
+    printWindow.document.write('<html><head><title>Print</title><style>');
+    printWindow.document.write(`
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #0B5D1E; color: white; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #0B5D1E; margin: 0; }
+        .header h2 { margin: 5px 0; color: #333; }
+        .header p { margin: 5px 0; color: #666; }
+        img.logo { height: 80px; margin-bottom: 10px; }
+        .student-info { margin-top: 15px; text-align: left; }
+        .student-info strong { color: #0B5D1E; }
+    `);
+    printWindow.document.write('</style></head><body>');
+
+    // New custom header
+    printWindow.document.write('<div class="header">');
+    printWindow.document.write('<img src="/static/images/logo.png" alt="Logo" class="logo">');
+    printWindow.document.write('<h1>University of Ibadan</h1>');
+    printWindow.document.write('<h2>Department of Agricultural & Environmental Engineering</h2>');
+    printWindow.document.write('<p><strong>Academic Results</strong></p>');
+    printWindow.document.write('</div>');
+
+    // Student info
+    printWindow.document.write('<div class="student-info">');
+    printWindow.document.write(`<p><strong>Name:</strong> ${studentName}</p>`);
+    printWindow.document.write(`<p><strong>Matric Number:</strong> ${matricNumber}</p>`);
+    printWindow.document.write(`<p><strong>Level:</strong> ${level}</p>`);
+    printWindow.document.write(`<p><strong>CGPA:</strong> ${parseFloat(cgpa).toFixed(2)}</p>`);
+    printWindow.document.write('</div>');
+
+    // Results table only
+    if (table) {
+        printWindow.document.write(table.outerHTML);
+    }
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
