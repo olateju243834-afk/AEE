@@ -1,112 +1,282 @@
-
 import os
-import logging
-import json
-import functools
-from datetime import datetime
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, session, send_file
-from flask_mail import Mail, Message
-from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash, generate_password_hash
-from models import db, Contact, Payment
-import calendar
 import re
+import json
+import logging
+from datetime import datetime
+from functools import wraps
+from urllib.parse import urlparse
 
-EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
-ALLOWED_LEVELS = {100, 200, 300, 400, 500}
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "pdf"}
+from flask import (
+    Flask, render_template, request, flash, redirect,
+    url_for, jsonify, send_file, session
+)
+from flask_mail import Mail, Message
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user,
+    login_required, current_user
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
-# --------------------------------------------------------
-# Configure logging
-# --------------------------------------------------------
+import psycopg2
+import psycopg2.extras
+from psycopg2.extras import RealDictCursor
+
+# Local models for main site (make sure this file exists and contains your models)
+from models import db, Contact, Payment
+
+# =========================================================
+# --- CONFIGURATION ---
+# =========================================================
 logging.basicConfig(level=logging.DEBUG)
 
-# --------------------------------------------------------
-# Initialize app
-# --------------------------------------------------------
 app = Flask(__name__)
-app.secret_key = 'some_super_secret_key_12345'
-#if not os.environ.get("SESSION_SECRET"):
-#    raise RuntimeError("SESSION_SECRET environment variable must be set")
-#app.secret_key = os.environ["SESSION_SECRET"]
 
-# --------------------------------------------------------
-# Database configuration (PostgreSQL instead of SQLite)
-# --------------------------------------------------------
+# Secret Key (required)
+session_secret = os.environ.get("SESSION_SECRET")
+if not session_secret:
+    raise RuntimeError("SESSION_SECRET environment variable must be set")
+app.secret_key = session_secret
+
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# =========================================================
+# --- DATABASE CONFIG (SQLAlchemy) ---
+# =========================================================
+# Primary DB URI for SQLAlchemy — uses main website DATABASE_URL
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "postgresql+psycopg://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_recycle": 300, "pool_pre_ping": True}
+db.init_app(app)
 
-#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
+# =========================================================
+# --- psycopg2 CONNECTION (used by result portal raw SQL) ---
+# =========================================================
+def get_db_connection():
+    """
+    Create a psycopg2 connection to the same DATABASE_URL used by SQLAlchemy.
+    Accepts DATABASE_URL in forms like:
+      - postgresql://user:pass@host:port/dbname
+      - postgres://...
+      - postgresql+psycopg://... (replaced to postgresql://)
+    """
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError("DATABASE_URL environment variable must be set to connect to the DB")
+
+    # Normalize known prefixes
+    if db_url.startswith("postgresql+psycopg://"):
+        db_url = db_url.replace("postgresql+psycopg://", "postgresql://", 1)
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    parsed = urlparse(db_url)
+    if parsed.scheme and parsed.scheme.startswith("postgres"):
+        username = parsed.username
+        password = parsed.password
+        hostname = parsed.hostname
+        port = parsed.port or 5432
+        database = parsed.path.lstrip('/')
+        # Use sslmode=require for remote DBs (Render). If you don't want this, change/remove sslmode.
+        return psycopg2.connect(
+            host=hostname,
+            dbname=database,
+            user=username,
+            password=password,
+            port=port,
+            sslmode='require'
+        )
+    # fallback — raw dsn
+    return psycopg2.connect(db_url)
 
 
-# --------------------------------------------------------
-# Mail configuration
-# --------------------------------------------------------
+# =========================================================
+# --- MAIL CONFIG ---
+# =========================================================
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+mail = Mail(app)
 
-# --------------------------------------------------------
-# File upload configuration
-# --------------------------------------------------------
+# =========================================================
+# --- UPLOAD CONFIG ---
+# =========================================================
 app.config['UPLOAD_FOLDER'] = 'uploads/receipts'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
-
-# --------------------------------------------------------
-# Allowed file types for upload
-# --------------------------------------------------------
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --------------------------------------------------------
-# Initialize extensions
-# --------------------------------------------------------
-db.init_app(app)
-mail = Mail(app)
-
-# --------------------------------------------------------
-# Admin credentials and decorator
-# --------------------------------------------------------
-ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH')
-if not ADMIN_PASSWORD_HASH:
-    ADMIN_PASSWORD_HASH = generate_password_hash("admin123")
-
-
-def admin_required(f):
-    @functools.wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'admin_logged_in' not in session:
-            return redirect(url_for('admin_login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-# --------------------------------------------------------
-# Template filters
-# --------------------------------------------------------
-@app.template_filter('nl2br')
-def nl2br_filter(text):
-    """Convert newlines to HTML br tags"""
-    if text:
-        return text.replace('\n', '<br>\n')
-    return text
-
-# --------------------------------------------------------
-# Create upload directory
-# --------------------------------------------------------
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# --------------------------------------------------------
-# Public Routes
-# --------------------------------------------------------
+# =========================================================
+# --- LOGIN MANAGER ---
+# =========================================================
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'info'
+
+# =========================================================
+# --- UTILITIES / RESULT PORTAL HELPERS ---
+# =========================================================
+EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
+ALLOWED_LEVELS = {100, 200, 300, 400, 500}
+
+def roles_required(*roles):
+    def decorator(f):
+        @wraps(f)
+        @login_required
+        def decorated_function(*args, **kwargs):
+            user_role = getattr(current_user, 'role', None)
+            if user_role not in roles:
+                flash('Access denied. Insufficient privileges.', 'error')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def validate_matric_number(matric_number):
+    if matric_number is None:
+        return False
+    mn = str(matric_number).strip()
+    return bool(re.fullmatch(r'\d{6}', mn))
+
+def get_student_level_for_session(matric_number, session_name):
+    try:
+        if not matric_number:
+            raise ValueError("Empty matric number")
+        mn = re.sub(r'\D', '', str(matric_number)).strip()
+        now_year = datetime.utcnow().year
+        entry_year = None
+        if len(mn) >= 4:
+            try:
+                first4 = int(mn[:4])
+                if 2000 <= first4 <= now_year:
+                    entry_year = first4
+            except ValueError:
+                pass
+        if entry_year is None and len(mn) >= 2:
+            try:
+                first2 = int(mn[:2])
+                candidate = 2000 + first2
+                if 2000 <= candidate <= now_year:
+                    entry_year = candidate
+            except ValueError:
+                pass
+        session_start_year = int(str(session_name).split('/')[0])
+        if entry_year is None:
+            entry_year = session_start_year
+        years_since_entry = session_start_year - entry_year
+        level = 100 + (years_since_entry * 100)
+        return max(100, min(level, 500))
+    except Exception:
+        return 200
+
+def calculate_grade_points(score, level):
+    if level == 100:
+        if score >= 70: return 5.0
+        elif score >= 60: return 4.0
+        elif score >= 50: return 3.0
+        elif score >= 45: return 2.0
+        elif score >= 40: return 1.0
+        else: return 0.0
+    else:
+        if score >= 70: return 4.0
+        elif score >= 60: return 3.0
+        elif score >= 50: return 2.0
+        elif score >= 45: return 1.0
+        else: return 0.0
+
+def get_letter_grade(score):
+    if score >= 70: return 'A'
+    elif score >= 60: return 'B'
+    elif score >= 50: return 'C'
+    elif score >= 45: return 'D'
+    elif score >= 40: return 'E'
+    else: return 'F'
+
+# =========================================================
+# --- USER CLASS (RESULT PORTAL) ---
+# =========================================================
+class User(UserMixin):
+    def __init__(self, id, username, level, name, department, role, is_active=True, matric_number=None):
+        self.id = id
+        self.username = username
+        self.level = level
+        self.name = name
+        self.department = department
+        self.role = role
+        self.matric_number = matric_number
+        self._is_active = is_active if role == 'student' else True
+
+    def get_id(self):
+        # Must return a string that uniquely identifies this user for the loader
+        return f"{self.role}:{self.id}"
+
+    @property
+    def is_active(self):
+        return bool(self._is_active)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+@login_manager.user_loader
+def load_user(user_key):
+    try:
+        role, user_id = user_key.split(":", 1)
+    except ValueError:
+        return None
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            if role == 'student':
+                cur.execute("SELECT * FROM students WHERE id = %s", (user_id,))
+                student = cur.fetchone()
+                if student:
+                    return User(
+                        id=student['id'],
+                        username=student.get('matric_number'),
+                        level=student.get('level', 100),
+                        name=student.get('name', 'Unknown'),
+                        department=student.get('department', None),
+                        role="student",
+                        is_active=student.get('is_active', True),
+                        matric_number=student.get('matric_number')
+                    )
+            elif role in ['admin', 'super_admin', 'hod', 'exam_officer']:
+                cur.execute("SELECT * FROM admins WHERE id = %s", (user_id,))
+                admin = cur.fetchone()
+                if admin:
+                    return User(
+                        id=admin['id'],
+                        username=admin.get('username'),
+                        level=None,
+                        name=admin.get('name', 'Admin'),
+                        department=None,
+                        role=admin.get('role', 'exam_officer'),
+                        is_active=admin.get('is_active', True),
+                        matric_number=None
+                    )
+    except Exception as e:
+        app.logger.error("load_user error: %s", e)
+    finally:
+        if conn:
+            conn.close()
+    return None
+
+# =========================================================
+# --- MAIN WEBSITE ROUTES (preserve exact handlers you provided) ---
+# =========================================================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -115,22 +285,22 @@ def index():
 def students():
     return render_template('students.html')
 
+@app.route('/news')
+def news():
+    return render_template('news.html')
 
 @app.route('/staff')
 def staff():
     return render_template('staff.html')
 
+@app.route('/payment')
+def payment():
+    return render_template('payment.html')
+
 @app.route('/academic_program')
 def academic_program():
     return render_template('academic_program.html')
 
-@app.route('/news')
-def news():
-    return render_template('news.html')
-
-@app.route('/payment')
-def payment():
-    return render_template('payment.html')
 @app.route('/contact', methods=['POST'])
 def contact():
     try:
@@ -215,7 +385,7 @@ def submit_payment():
         # Validate Email
         if not EMAIL_REGEX.match(email):
             return jsonify({'success': False, 'error': 'Invalid email format'})
-        
+
         # Handle payment date
         payment_date = None
         if payment_date_str:
@@ -238,7 +408,7 @@ def submit_payment():
         if existing_payment:
             return jsonify({'success': False, 'error': 'Payment already exists for this matric number'})
         
-        # Save payment to database
+        # Save payment to database (SQLAlchemy)
         payment = Payment(
             full_name=full_name,
             matric_number=matric_number,
@@ -300,261 +470,544 @@ def submit_payment():
         app.logger.error(f"Error processing payment: {str(e)}")
         return jsonify({'success': False, 'error': 'Error processing payment. Please try again.'})
 
-# --------------------------------------------------------
-# Admin Routes
-# --------------------------------------------------------
-# Admin login (GET + POST in one route)
-@app.route('/admin', methods=['GET', 'POST'])
-@app.route('/admin-access', methods=['GET', 'POST'])
-def admin_login():
+# =========================================================
+# --- RESULT PORTAL ROUTES (preserve all provided handlers) ---
+# =========================================================
+@app.before_request
+def check_student_active():
+    # Skip login, register, index, static
+    if request.endpoint in ['login', 'register', 'index', 'static']:
+        return
+
+    # Skip admin routes entirely for any admin-like role
+    if current_user.is_authenticated and getattr(current_user, 'role', None) in ['admin', 'super_admin', 'hod', 'exam_officer']:
+        return
+
+    # Check student account active status
+    if current_user.is_authenticated and getattr(current_user, 'role', None) == 'student':
+        if not current_user.is_active:
+            logout_user()
+            flash('Your account has been deactivated. Please contact the department.', 'error')
+            return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for(
+            'student_dashboard' if current_user.role == 'student' else 'admin_dashboard'
+        ))
+
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        identifier = request.form.get('identifier', '').strip()
+        password = request.form.get('password', '')
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            session['admin_logged_in'] = True
-            session['admin_username'] = username
-            flash('Login successful!', 'success')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Invalid credentials!', 'error')
-            return redirect(url_for('admin_login'))
+            # Student login
+            cur.execute("SELECT * FROM students WHERE matric_number = %s", (identifier,))
+            student = cur.fetchone()
+            if student and check_password_hash(student.get('password_hash', ''), password):
+                if not student.get('is_active', True):
+                    flash('Your account is inactive. Contact department.', 'error')
+                    return render_template('login.html')
 
-    # Handle GET request (show login page or redirect if already logged in)
-    if 'admin_logged_in' in session:
-        return redirect(url_for('admin_dashboard'))
-    return render_template('admin_login.html')
+                user = User(
+                    id=student['id'],
+                    username=student['matric_number'],
+                    level=student.get('level'),
+                    name=student.get('name'),
+                    department=student.get('department', None),
+                    role="student",
+                    is_active=student.get('is_active', True),
+                    matric_number=student['matric_number']
+                )
 
+                login_user(user, remember=True)
+                next_page = request.args.get('next')
+                return redirect(next_page or url_for('student_dashboard'))
 
-@app.route('/logout')
-def admin_logout():
-    session.pop('admin_logged_in', None)
-    session.pop('admin_username', None)
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('admin_login'))
+            # Admin login
+            cur.execute("SELECT * FROM admins WHERE username = %s", (identifier,))
+            admin = cur.fetchone()
+            if admin and check_password_hash(admin.get('password_hash', ''), password):
+                user = User(
+                    id=admin['id'],
+                    username=admin.get('username'),
+                    level=None,
+                    name=admin.get('name'),
+                    department=None,
+                    role=admin.get('role', 'exam_officer'),
+                    is_active=admin.get('is_active', True)
+                )
 
-@app.route('/dashboard')
-@admin_required
-def admin_dashboard():
-    # Get statistics
-    total_contacts = Contact.query.count()
-    total_payments = Payment.query.count()
-    pending_payments = Payment.query.filter_by(status='pending').count()
-    approved_payments = Payment.query.filter_by(status='approved').count()
-    
-    # Recent submissions
-    recent_contacts = Contact.query.order_by(Contact.created_at.desc()).limit(5).all()
-    recent_payments = Payment.query.order_by(Payment.created_at.desc()).limit(5).all()
-    
-    return render_template('admin_dashboard.html', 
-                         total_contacts=total_contacts,
-                         total_payments=total_payments,
-                         pending_payments=pending_payments,
-                         approved_payments=approved_payments,
-                         recent_contacts=recent_contacts,
-                         recent_payments=recent_payments)
+                login_user(user, remember=True)
+                next_page = request.args.get('next')
+                return redirect(next_page or url_for('admin_dashboard'))
 
-@app.route('/contacts')
-@admin_required
-def admin_contacts():
-    page = request.args.get('page', 1, type=int)
-    contacts = Contact.query.order_by(Contact.created_at.desc()).paginate(
-        page=page, per_page=20, error_out=False)
-    return render_template('admin_contacts.html', contacts=contacts)
+            flash('Invalid login credentials', 'error')
+        except Exception as e:
+            flash('Error during login. Check server logs.', 'error')
+            app.logger.error("Login error: %s", e)
+        finally:
+            if conn:
+                conn.close()
 
-@app.route('/contacts/<int:contact_id>')
-@admin_required
-def admin_view_contact(contact_id):
-    contact = Contact.query.get_or_404(contact_id)
-    return render_template('admin_contact_detail.html', contact=contact)
+    return render_template('login.html')
 
-@app.route('/contacts/<int:contact_id>/delete', methods=['POST'])
-@admin_required
-def admin_delete_contact(contact_id):
-    contact = Contact.query.get_or_404(contact_id)
-    db.session.delete(contact)
-    db.session.commit()
-    flash('Contact deleted successfully!', 'success')
-    return redirect(url_for('admin_contacts'))
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        matric_number = request.form.get('matric_number', '').strip()
+        try:
+            level = int(request.form.get('level', '100'))
+        except ValueError:
+            level = 100
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '')
 
-@app.route('/payments')
-@admin_required
-def admin_payments():
-    page = request.args.get('page', 1, type=int)
-    status_filter = request.args.get('status', '')
-    
-    query = Payment.query
-    if status_filter:
-        query = query.filter_by(status=status_filter)
-    
-    payments = query.order_by(Payment.created_at.desc()).paginate(
-        page=page, per_page=20, error_out=False)
-    return render_template('admin_payments.html', payments=payments, status_filter=status_filter)
+        if not validate_matric_number(matric_number):
+            flash('Invalid matric number format. Provide a 6-digit matric number.', 'error')
+            return render_template('register.html')
 
-@app.route('/payments/<int:payment_id>')
-@admin_required
-def admin_view_payment(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
+        password_hash = generate_password_hash(password)
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO students (name, matric_number, level, email, phone, password_hash, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (name, matric_number, level, email, phone, password_hash, False))
+            conn.commit()
+            flash('Registration successful! Pending approval.', 'success')
+            return redirect(url_for('login'))
+        except psycopg2.IntegrityError:
+            if conn:
+                conn.rollback()
+            flash('Matric number already exists', 'error')
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            flash('Registration failed. Try again.', 'error')
+            app.logger.error("Register error: %s", e)
+        finally:
+            if conn:
+                conn.close()
+    return render_template('register.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/student/dashboard')
+@roles_required('student')
+def student_dashboard():
+    conn = None
     try:
-        payment_items = json.loads(payment.payment_items) if payment.payment_items else []
-    except:
-        payment_items = []
-    return render_template('admin_payment_detail.html', payment=payment, payment_items=payment_items)
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("""
+            SELECT r.*, s.session_name FROM results r
+            JOIN sessions s ON r.session_id = s.id
+            WHERE r.student_id = %s
+            ORDER BY s.session_name DESC, r.semester DESC
+        """, (current_user.id,))
+        results = cur.fetchall()
 
-@app.route('/payments/<int:payment_id>/update_status', methods=['POST'])
-@admin_required
-def admin_update_payment_status(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    new_status = request.form.get('status')
-    
-    if new_status in ['pending', 'approved', 'rejected']:
-        payment.status = new_status
-        payment.updated_at = datetime.utcnow()
-        db.session.commit()
-        flash(f'Payment status updated to {new_status}!', 'success')
+        total_points, total_units = 0, 0
+        results_list = []
+        for result in results:
+            result_dict = dict(result)
+            student_level = get_student_level_for_session(current_user.matric_number, result['session_name'])
+            gp = calculate_grade_points(result['score'], student_level)
+            result_dict['correct_grade_point'] = gp
+            result_dict['level_at_time'] = student_level
+            total_points += gp * result['course_unit']
+            total_units += result['course_unit']
+            results_list.append(result_dict)
+
+        cgpa = round(total_points / total_units, 2) if total_units > 0 else 0.00
+        return render_template('student_dashboard.html',
+                               results=results_list,
+                               cgpa=cgpa,
+                               student_name=current_user.name,
+                               matric_number=current_user.username,
+                               level=current_user.level)
+    except Exception as e:
+        flash('Error loading dashboard', 'error')
+        app.logger.error("Student dashboard error: %s", e)
+        return redirect(url_for('index'))
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/admin/dashboard')
+@roles_required('super_admin', 'hod', 'exam_officer', 'admin')
+def admin_dashboard():
+    if current_user.role == 'student':
+        return redirect(url_for('student_dashboard'))
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT COUNT(*) AS cnt FROM students")
+        total_students = cur.fetchone()['cnt']
+        cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = true")
+        active_students = cur.fetchone()['cnt']
+        cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = false")
+        pending_students = cur.fetchone()['cnt']
+        cur.execute("SELECT COUNT(*) AS cnt FROM results")
+        total_results = cur.fetchone()['cnt']
+        return render_template('admin_dashboard.html',
+                               total_students=total_students,
+                               active_students=active_students,
+                               pending_students=pending_students,
+                               total_results=total_results)
+    except Exception as e:
+        flash('Error loading admin dashboard', 'error')
+        app.logger.error("Admin dashboard error: %s", e)
+        return redirect(url_for('index'))
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/admin/add-admin', methods=['POST'])
+@login_required
+def add_admin():
+    # Only super admins or HOD can add new admins
+    if current_user.role not in ['super_admin', 'hod']:
+        flash("You don't have permission to add admins.", "error")
+        return redirect(url_for('admin_dashboard'))
+
+    name = request.form.get('name', '').strip()
+    username = request.form.get('username', '').strip()
+    role = request.form.get('role', 'exam_officer').strip()  # default to exam_officer
+    password = request.form.get('password', '')
+
+    if not name or not username or not role or not password:
+        flash("All fields are required.", "error")
+        return redirect(url_for('admin_dashboard'))
+
+    password_hash = generate_password_hash(password)
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO admins (name, username, role, password_hash)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (name, username, role, password_hash))
+            conn.commit()
+        flash("New admin created successfully!", "success")
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash("Error creating admin. Username may already exist.", "error")
+        app.logger.error("Add Admin Error: %s", e)
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(url_for('admin_dashboard'))
+
+@app.route("/api/students")
+@login_required
+def get_students():
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT 
+                    id,
+                    matric_number,
+                    name,
+                    level,
+                    email,
+                    phone,
+                    is_active,
+                    created_at
+                FROM students
+                ORDER BY created_at DESC
+            """)
+            students = cur.fetchall()
+            return jsonify(students)
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/admins')
+@login_required
+def api_admins():
+    if current_user.role not in ['hod', 'super_admin']:
+        return jsonify([])
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, name, username, role, created_at FROM admins")
+        rows = cur.fetchall()
+        admins = [
+            {"id": r[0], "name": r[1], "username": r[2], "role": r[3], "created_at": r[4].isoformat()}
+            for r in rows
+        ]
+        return jsonify(admins)
+    finally:
+        if conn:
+            conn.close()
+
+@app.route("/admin/toggle-student-status", methods=["POST"])
+@login_required
+def toggle_student_status():
+    data = request.get_json()
+    student_id = data.get("id")
+    new_status = data.get("is_active")
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE students
+                SET is_active = %s
+                WHERE id = %s
+            """, (new_status, student_id))
+            conn.commit()
+        return jsonify({"success": True, "message": "Student status updated"})
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route("/api/sessions", methods=["GET"])
+@login_required
+@roles_required("super_admin", "hod", "exam_officer")
+def get_sessions():
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT id, session_name, is_current FROM sessions ORDER BY id DESC")
+            sessions = cur.fetchall()
+            return jsonify(sessions)
+    finally:
+        if conn:
+            conn.close()
+
+@app.route("/admin/add-result", methods=["POST"])
+@login_required
+@roles_required("super_admin", "hod", "exam_officer")
+def add_result():
+    # Accept JSON or form-data
+    data = request.get_json(silent=True)
+    if not data:
+        data = request.form.to_dict()
+
+    # Extract values safely
+    try:
+        student_id = int(data.get("student_id"))
+        course_code = data.get("course_code", "").strip()
+        course_title = data.get("course_title", "").strip()
+        course_unit = int(data.get("course_unit", 0))
+        score = float(data.get("score", 0))
+        semester = data.get("semester", "").strip()
+        session_id = int(data.get("session_id"))
+    except Exception as e:
+        return jsonify({"error": f"Invalid input data: {str(e)}"}), 400
+
+    # Grading logic
+    if score >= 70:
+        grade, grade_point = "A", 5.0
+    elif score >= 60:
+        grade, grade_point = "B", 4.0
+    elif score >= 50:
+        grade, grade_point = "C", 3.0
+    elif score >= 45:
+        grade, grade_point = "D", 2.0
+    elif score >= 40:
+        grade, grade_point = "E", 1.0
     else:
-        flash('Invalid status!', 'error')
-    
-    return redirect(url_for('admin_view_payment', payment_id=payment_id))
+        grade, grade_point = "F", 0.0
 
-@app.route('/payments/<int:payment_id>/edit', methods=['GET', 'POST'])
-@admin_required
-def admin_edit_payment(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    
-    if request.method == 'POST':
-        payment.full_name = request.form.get('full_name')
-        payment.matric_number = request.form.get('matric_number')
-        payment.level = int(request.form.get('level', 0))
-        payment.email = request.form.get('email')
-        payment.phone_number = request.form.get('phone_number')
-        payment.total_amount = float(request.form.get('total_amount', 0))
-        payment.transaction_ref = request.form.get('transaction_ref')
-        payment.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        flash('Payment updated successfully!', 'success')
-        return redirect(url_for('admin_view_payment', payment_id=payment_id))
-    
-    return render_template('admin_edit_payment.html', payment=payment)
+    # Insert into DB
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO results (
+                    student_id, course_code, course_title, course_unit, score,
+                    grade, grade_point, semester, session_id, uploaded_by
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                student_id, course_code, course_title, course_unit, score,
+                grade, grade_point, semester, session_id, current_user.id
+            ))
+            conn.commit()
+        return jsonify({"message": "Result added successfully"}), 201
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
-@app.route('/payments/<int:payment_id>/delete', methods=['POST'])
-@admin_required
-def admin_delete_payment(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    
-    # Delete associated receipt file if exists
-    if payment.receipt_filename:
-        receipt_path = os.path.join('uploads/receipts', payment.receipt_filename)
-        if os.path.exists(receipt_path):
-            os.remove(receipt_path)
-    
-    db.session.delete(payment)
-    db.session.commit()
-    flash('Payment deleted successfully!', 'success')
-    return redirect(url_for('admin_payments'))
+@app.route('/admin/analytics')
+@login_required
+@roles_required('super_admin', 'hod', 'exam_officer')
+def admin_analytics():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-@app.route('/receipts/<filename>')
-@admin_required
-def admin_view_receipt(filename):
-    receipt_path = os.path.join('uploads/receipts', filename)
-    if os.path.exists(receipt_path):
-        return send_file(receipt_path)
-    else:
-        flash('Receipt file not found!', 'error')
-        return redirect(url_for('admin_payments'))
+        # ---------------- Students per level ----------------
+        cursor.execute("SELECT level, COUNT(*) AS total FROM students GROUP BY level ORDER BY level")
+        students_per_level = cursor.fetchall()
 
-@app.route('/export/contacts')
-@admin_required
-def admin_export_contacts():
-    contacts = Contact.query.all()
-    
-    # Create CSV content
-    csv_content = "ID,Name,Email,Subject,Message,Created At\n"
-    for contact in contacts:
-        csv_content += f'"{contact.id}","{contact.name}","{contact.email}","{contact.subject}","{contact.message.replace(chr(34), chr(34)+chr(34))}","{contact.created_at}"\n'
-    
-    # Save to file
-    filename = f"contacts_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    filepath = os.path.join('uploads', filename)
-    os.makedirs('uploads', exist_ok=True)
-    
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write(csv_content)
-    
-    return send_file(filepath, as_attachment=True, download_name=filename)
+        # ---------------- Performance distribution ----------------
+        cursor.execute("""
+            WITH student_avg AS (
+                SELECT student_id, AVG(score) AS avg_score
+                FROM results
+                GROUP BY student_id
+            )
+            SELECT 
+                CASE 
+                    WHEN avg_score >= 70 THEN 'First Class/Distinction'
+                    WHEN avg_score >= 60 THEN 'Second Class Upper'
+                    WHEN avg_score >= 50 THEN 'Second Class Lower'
+                    WHEN avg_score >= 45 THEN 'Third Class'
+                    ELSE 'Pass/Fail'
+                END AS class,
+                COUNT(*) AS total
+            FROM student_avg
+            GROUP BY class
+            ORDER BY class
+        """)
+        performance_distribution = cursor.fetchall()
 
-@app.route('/export/payments')
-@admin_required
-def admin_export_payments():
-    payments = Payment.query.all()
-    
-    # Create CSV content
-    csv_content = "ID,Full Name,Matric Number,Level,Email,Phone,Total Amount,Status,Transaction Ref,Created At\n"
-    for payment in payments:
-        csv_content += f'"{payment.id}","{payment.full_name}","{payment.matric_number}","{payment.level}","{payment.email}","{payment.phone_number}","{payment.total_amount}","{payment.status}","{payment.transaction_ref or ""}","{payment.created_at}"\n'
-    
-    # Save to file
-    filename = f"payments_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    filepath = os.path.join('uploads', filename)
-    os.makedirs('uploads', exist_ok=True)
-    
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write(csv_content)
-    
-    return send_file(filepath, as_attachment=True, download_name=filename)
+        cursor.close()
+        return jsonify({
+            "students_per_level": [dict(row) for row in students_per_level],
+            "performance_distribution": [dict(row) for row in performance_distribution]
+        })
+    except Exception as e:
+        app.logger.error("admin_analytics error: %s", e)
+        return jsonify({"error": "Error generating analytics"}), 500
+    finally:
+        if conn:
+            conn.close()
 
-@app.route('/admin/stats')
-@admin_required
-def admin_stats():
-    # Payment statistics by level
-    level_stats = db.session.query(
-        Payment.level,
-        db.func.count(Payment.id),
-        db.func.sum(Payment.total_amount)
-    ).group_by(Payment.level).all()
+# =========================================================
+# --- DEFAULT ADMIN + SEEDERS (use same DB) ---
+# =========================================================
+def create_default_super_admin():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Ensure the admins table exists or this will raise; db.create_all() should be run first
+        cur.execute("SELECT COUNT(*) AS cnt FROM admins")
+        row = cur.fetchone()
+        if row and row['cnt'] == 0:
+            default_username = os.environ.get('DEFAULT_ADMIN_USER', 'admin')
+            default_password = os.environ.get('DEFAULT_ADMIN_PASS', 'admin123')
+            password_hash = generate_password_hash(default_password)
+            cur.execute("""
+                INSERT INTO admins (username, name, role, password_hash)
+                VALUES (%s, %s, %s, %s)
+            """, (default_username, "Super Admin", "super_admin", password_hash))
+            conn.commit()
+            print(f"✅ Default super admin created: username='{default_username}', password='{default_password}'")
+        cur.close()
+    except Exception as e:
+        print("⚠️ Error creating default super admin (table may not exist yet):", e)
+        if conn:
+            conn.rollback()
+    finally:
+        if conn:
+            conn.close()
 
-    # Payment statistics by status
-    status_stats = db.session.query(
-        Payment.status,
-        db.func.count(Payment.id),
-        db.func.sum(Payment.total_amount)
-    ).group_by(Payment.status).all()
+def seed_default_session_and_courses():
+    """
+    Insert a default session and sample courses if missing (non-destructive).
+    """
+    sample_courses = [
+        ('AGE 101', 'Introduction to Agricultural Engineering', 2, 100, 1),
+        ('AGE 102', 'Engineering Drawing and Design', 3, 100, 1),
+        ('AGE 103', 'Mathematics for Engineers I', 3, 100, 1),
+        ('AGE 104', 'Physics for Engineers', 3, 100, 1),
+        ('AGE 105', 'Chemistry for Engineers', 3, 100, 1),
+        ('AGE 111', 'Workshop Technology', 2, 100, 2),
+        ('AGE 112', 'Mathematics for Engineers II', 3, 100, 2),
+        ('AGE 113', 'Engineering Mechanics', 3, 100, 2),
+        ('AGE 201', 'Fluid Mechanics', 3, 200, 1),
+        ('AGE 202', 'Strength of Materials', 3, 200, 1),
+        ('AGE 203', 'Thermodynamics', 3, 200, 1),
+        ('AGE 301', 'Farm Power and Machinery', 3, 300, 1),
+        ('AGE 302', 'Soil and Water Engineering', 3, 300, 1),
+        ('AGE 401', 'Agricultural Processing Engineering', 3, 400, 1),
+        ('AGE 501', 'Project', 6, 500, 1)
+    ]
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Sessions
+        cur.execute("SELECT COUNT(*) AS cnt FROM sessions")
+        cnt = cur.fetchone()['cnt']
+        if cnt == 0:
+            cur.execute("INSERT INTO sessions (session_name, is_current) VALUES (%s, %s)", ('2024/2025', True))
+            conn.commit()
+            print("✅ Default session 2024/2025 created")
 
-    # Monthly payment trends (Postgres only; for SQLite use strftime instead of to_char)
-    month_expr = db.func.to_char(Payment.created_at, 'YYYY-MM').label('month')
-    monthly_stats_raw = db.session.query(
-        month_expr,
-        db.func.count(Payment.id).label('count'),
-        db.func.sum(Payment.total_amount).label('total')
-    ).group_by(month_expr).order_by(month_expr).all()
+        # Courses
+        cur.execute("SELECT COUNT(*) AS cnt FROM courses")
+        cnt_courses = cur.fetchone()['cnt']
+        if cnt_courses == 0:
+            for course in sample_courses:
+                cur.execute("""
+                    INSERT INTO courses (course_code, course_title, course_unit, level, semester)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, course)
+            conn.commit()
+            print("✅ Sample courses inserted")
+        cur.close()
+    except Exception as e:
+        print("⚠️ Error seeding sessions/courses (table may not exist yet):", e)
+        if conn:
+            conn.rollback()
+    finally:
+        if conn:
+            conn.close()
 
-    # Format months for display
-    import calendar
-    monthly_stats = []
-    for row in monthly_stats_raw:
-        if row[0]:
-            year, month = map(int, row[0].split('-'))
-            label = f"{calendar.month_name[month]} {year}"
-        else:
-            label = "Unknown"
-        monthly_stats.append((label, row[1], row[2]))
-
-    # ✅ This return must align with other indented code in the function
-    return render_template(
-        'admin_stats.html',
-        level_stats=level_stats,
-        status_stats=status_stats,
-        monthly_stats=monthly_stats
-    )
-
-
-# --------------------------------------------------------
-# Initialize database
-# --------------------------------------------------------
+# =========================================================
+# --- STARTUP: Create SQLAlchemy tables, then seed defaults ---
+# =========================================================
 with app.app_context():
+    # This will create tables for SQLAlchemy-defined models in models.py
     db.create_all()
 
+# Create super admin and seed sessions/courses (use psycopg2, connecting to same DB)
+create_default_super_admin()
+seed_default_session_and_courses()
+
+# =========================================================
+# --- RUN APP ---
+# =========================================================
 if __name__ == '__main__':
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
