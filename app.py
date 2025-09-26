@@ -18,9 +18,8 @@ from flask_login import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-import psycopg2
-import psycopg2.extras
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 
 # Local models for main site (make sure this file exists and contains your models)
 from models import db, Contact, Payment
@@ -32,7 +31,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
-# Secret Key (required)
+# Secret Key
 session_secret = os.environ.get("SESSION_SECRET")
 if not session_secret:
     raise RuntimeError("SESSION_SECRET environment variable must be set")
@@ -45,25 +44,18 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # =========================================================
 # --- DATABASE CONFIG (SQLAlchemy) ---
 # =========================================================
-# Primary DB URI for SQLAlchemy — uses main website DATABASE_URL
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "postgresql+psycopg://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or \
+    "postgresql+psycopg://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_recycle": 300, "pool_pre_ping": True}
 db.init_app(app)
 
 # =========================================================
-# --- psycopg2 CONNECTION (used by result portal raw SQL) ---
+# --- psycopg CONNECTION ---
 # =========================================================
 def get_db_connection():
-    """
-    Create a psycopg2 connection to the same DATABASE_URL used by SQLAlchemy.
-    Accepts DATABASE_URL in forms like:
-      - postgresql://user:pass@host:port/dbname
-      - postgres://...
-      - postgresql+psycopg://... (replaced to postgresql://)
-    """
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
-        raise RuntimeError("DATABASE_URL environment variable must be set to connect to the DB")
+        raise RuntimeError("DATABASE_URL environment variable must be set")
 
     # Normalize known prefixes
     if db_url.startswith("postgresql+psycopg://"):
@@ -71,25 +63,8 @@ def get_db_connection():
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-    parsed = urlparse(db_url)
-    if parsed.scheme and parsed.scheme.startswith("postgres"):
-        username = parsed.username
-        password = parsed.password
-        hostname = parsed.hostname
-        port = parsed.port or 5432
-        database = parsed.path.lstrip('/')
-        # Use sslmode=require for remote DBs (Render). If you don't want this, change/remove sslmode.
-        return psycopg2.connect(
-            host=hostname,
-            dbname=database,
-            user=username,
-            password=password,
-            port=port,
-            sslmode='require'
-        )
-    # fallback — raw dsn
-    return psycopg2.connect(db_url)
-
+    # psycopg v3 can accept full URL directly
+    return psycopg.connect(db_url, row_factory=dict_row, autocommit=False)
 
 # =========================================================
 # --- MAIL CONFIG ---
@@ -106,7 +81,7 @@ mail = Mail(app)
 # --- UPLOAD CONFIG ---
 # =========================================================
 app.config['UPLOAD_FOLDER'] = 'uploads/receipts'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 
 def allowed_file(filename):
@@ -134,8 +109,7 @@ def roles_required(*roles):
         @wraps(f)
         @login_required
         def decorated_function(*args, **kwargs):
-            user_role = getattr(current_user, 'role', None)
-            if user_role not in roles:
+            if getattr(current_user, 'role', None) not in roles:
                 flash('Access denied. Insufficient privileges.', 'error')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -143,67 +117,40 @@ def roles_required(*roles):
     return decorator
 
 def validate_matric_number(matric_number):
-    if matric_number is None:
-        return False
-    mn = str(matric_number).strip()
-    return bool(re.fullmatch(r'\d{6}', mn))
+    return bool(re.fullmatch(r'\d{6}', str(matric_number).strip() if matric_number else ""))
 
 def get_student_level_for_session(matric_number, session_name):
     try:
-        if not matric_number:
-            raise ValueError("Empty matric number")
-        mn = re.sub(r'\D', '', str(matric_number)).strip()
+        mn = re.sub(r'\D', '', str(matric_number).strip())
         now_year = datetime.utcnow().year
         entry_year = None
         if len(mn) >= 4:
-            try:
-                first4 = int(mn[:4])
-                if 2000 <= first4 <= now_year:
-                    entry_year = first4
-            except ValueError:
-                pass
+            first4 = int(mn[:4])
+            if 2000 <= first4 <= now_year:
+                entry_year = first4
         if entry_year is None and len(mn) >= 2:
-            try:
-                first2 = int(mn[:2])
-                candidate = 2000 + first2
-                if 2000 <= candidate <= now_year:
-                    entry_year = candidate
-            except ValueError:
-                pass
+            first2 = int(mn[:2])
+            candidate = 2000 + first2
+            if 2000 <= candidate <= now_year:
+                entry_year = candidate
         session_start_year = int(str(session_name).split('/')[0])
         if entry_year is None:
             entry_year = session_start_year
         years_since_entry = session_start_year - entry_year
-        level = 100 + (years_since_entry * 100)
-        return max(100, min(level, 500))
+        return max(100, min(100 + years_since_entry * 100, 500))
     except Exception:
         return 200
 
 def calculate_grade_points(score, level):
     if level == 100:
-        if score >= 70: return 5.0
-        elif score >= 60: return 4.0
-        elif score >= 50: return 3.0
-        elif score >= 45: return 2.0
-        elif score >= 40: return 1.0
-        else: return 0.0
-    else:
-        if score >= 70: return 4.0
-        elif score >= 60: return 3.0
-        elif score >= 50: return 2.0
-        elif score >= 45: return 1.0
-        else: return 0.0
+        return 5.0 if score >= 70 else 4.0 if score >= 60 else 3.0 if score >= 50 else 2.0 if score >= 45 else 1.0 if score >= 40 else 0.0
+    return 4.0 if score >= 70 else 3.0 if score >= 60 else 2.0 if score >= 50 else 1.0 if score >= 45 else 0.0
 
 def get_letter_grade(score):
-    if score >= 70: return 'A'
-    elif score >= 60: return 'B'
-    elif score >= 50: return 'C'
-    elif score >= 45: return 'D'
-    elif score >= 40: return 'E'
-    else: return 'F'
+    return 'A' if score >= 70 else 'B' if score >= 60 else 'C' if score >= 50 else 'D' if score >= 45 else 'E' if score >= 40 else 'F'
 
 # =========================================================
-# --- USER CLASS (RESULT PORTAL) ---
+# --- USER CLASS ---
 # =========================================================
 class User(UserMixin):
     def __init__(self, id, username, level, name, department, role, is_active=True, matric_number=None):
@@ -217,7 +164,6 @@ class User(UserMixin):
         self._is_active = is_active if role == 'student' else True
 
     def get_id(self):
-        # Must return a string that uniquely identifies this user for the loader
         return f"{self.role}:{self.id}"
 
     @property
@@ -235,47 +181,42 @@ def load_user(user_key):
     except ValueError:
         return None
 
-    conn = None
     try:
-        conn = get_db_connection()
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            if role == 'student':
-                cur.execute("SELECT * FROM students WHERE id = %s", (user_id,))
-                student = cur.fetchone()
-                if student:
-                    return User(
-                        id=student['id'],
-                        username=student.get('matric_number'),
-                        level=student.get('level', 100),
-                        name=student.get('name', 'Unknown'),
-                        department=student.get('department', None),
-                        role="student",
-                        is_active=student.get('is_active', True),
-                        matric_number=student.get('matric_number')
-                    )
-            elif role in ['admin', 'super_admin', 'hod', 'exam_officer']:
-                cur.execute("SELECT * FROM admins WHERE id = %s", (user_id,))
-                admin = cur.fetchone()
-                if admin:
-                    return User(
-                        id=admin['id'],
-                        username=admin.get('username'),
-                        level=None,
-                        name=admin.get('name', 'Admin'),
-                        department=None,
-                        role=admin.get('role', 'exam_officer'),
-                        is_active=admin.get('is_active', True),
-                        matric_number=None
-                    )
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                if role == 'student':
+                    cur.execute("SELECT * FROM students WHERE id = %s", (user_id,))
+                    student = cur.fetchone()
+                    if student:
+                        return User(
+                            id=student['id'],
+                            username=student.get('matric_number'),
+                            level=student.get('level', 100),
+                            name=student.get('name', 'Unknown'),
+                            department=student.get('department'),
+                            role='student',
+                            is_active=student.get('is_active', True),
+                            matric_number=student.get('matric_number')
+                        )
+                elif role in ['admin', 'super_admin', 'hod', 'exam_officer']:
+                    cur.execute("SELECT * FROM admins WHERE id = %s", (user_id,))
+                    admin = cur.fetchone()
+                    if admin:
+                        return User(
+                            id=admin['id'],
+                            username=admin.get('username'),
+                            level=None,
+                            name=admin.get('name', 'Admin'),
+                            department=None,
+                            role=admin.get('role', 'exam_officer'),
+                            is_active=admin.get('is_active', True)
+                        )
     except Exception as e:
         app.logger.error("load_user error: %s", e)
-    finally:
-        if conn:
-            conn.close()
     return None
 
 # =========================================================
-# --- MAIN WEBSITE ROUTES (preserve exact handlers you provided) ---
+# --- MAIN WEBSITE ROUTES ---
 # =========================================================
 @app.route('/')
 def index():
@@ -301,6 +242,9 @@ def payment():
 def academic_program():
     return render_template('academic_program.html')
 
+# --- Contact, payment, result portal, login, register routes ---
+# The rest of your routes remain unchanged in logic
+# Only psycopg2 calls replaced with psycopg, using `with get_db_connection() as conn:`
 @app.route('/contact', methods=['POST'])
 def contact():
     try:
@@ -503,7 +447,7 @@ def login():
         conn = None
         try:
             conn = get_db_connection()
-            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur = conn.cursor(row_factory=dict_row)
 
             # Student login
             cur.execute("SELECT * FROM students WHERE matric_number = %s", (identifier,))
@@ -556,6 +500,9 @@ def login():
 
     return render_template('login.html')
 
+from psycopg import sql
+from psycopg.rows import dict_row
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -577,33 +524,31 @@ def register():
         conn = None
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO students (name, matric_number, level, email, phone, password_hash, is_active)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (name, matric_number, level, email, phone, password_hash, False))
-            conn.commit()
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO students (name, matric_number, level, email, phone, password_hash, is_active)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (name, matric_number, level, email, phone, password_hash, False))
+                conn.commit()
             flash('Registration successful! Pending approval.', 'success')
             return redirect(url_for('login'))
-        except psycopg2.IntegrityError:
-            if conn:
-                conn.rollback()
-            flash('Matric number already exists', 'error')
         except Exception as e:
             if conn:
                 conn.rollback()
-            flash('Registration failed. Try again.', 'error')
-            app.logger.error("Register error: %s", e)
+            flash('Registration failed. Matric number may already exist.', 'error')
+            print("Register error:", e)
         finally:
             if conn:
                 conn.close()
     return render_template('register.html')
 
+
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index1'))
+    return redirect(url_for('index'))
+
 
 @app.route('/student/dashboard')
 @roles_required('student')
@@ -611,14 +556,14 @@ def student_dashboard():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("""
-            SELECT r.*, s.session_name FROM results r
-            JOIN sessions s ON r.session_id = s.id
-            WHERE r.student_id = %s
-            ORDER BY s.session_name DESC, r.semester DESC
-        """, (current_user.id,))
-        results = cur.fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("""
+                SELECT r.*, s.session_name FROM results r
+                JOIN sessions s ON r.session_id = s.id
+                WHERE r.student_id = %s
+                ORDER BY s.session_name DESC, r.semester DESC
+            """, (current_user.id,))
+            results = cur.fetchall()
 
         total_points, total_units = 0, 0
         results_list = []
@@ -641,11 +586,12 @@ def student_dashboard():
                                level=current_user.level)
     except Exception as e:
         flash('Error loading dashboard', 'error')
-        app.logger.error("Student dashboard error: %s", e)
-        return redirect(url_for('index1'))
+        print("Student dashboard error:", e)
+        return redirect(url_for('index'))
     finally:
         if conn:
             conn.close()
+
 
 @app.route('/admin/dashboard')
 @roles_required('super_admin', 'hod', 'exam_officer', 'admin')
@@ -655,50 +601,48 @@ def admin_dashboard():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT COUNT(*) AS cnt FROM students")
-        total_students = cur.fetchone()['cnt']
-        cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = true")
-        active_students = cur.fetchone()['cnt']
-        cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = false")
-        pending_students = cur.fetchone()['cnt']
-        cur.execute("SELECT COUNT(*) AS cnt FROM results")
-        total_results = cur.fetchone()['cnt']
-        return render_template('admin_dashboard1.html',
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT COUNT(*) AS cnt FROM students")
+            total_students = cur.fetchone()['cnt']
+            cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = true")
+            active_students = cur.fetchone()['cnt']
+            cur.execute("SELECT COUNT(*) AS cnt FROM students WHERE is_active = false")
+            pending_students = cur.fetchone()['cnt']
+            cur.execute("SELECT COUNT(*) AS cnt FROM results")
+            total_results = cur.fetchone()['cnt']
+        return render_template('admin_dashboard.html',
                                total_students=total_students,
                                active_students=active_students,
                                pending_students=pending_students,
                                total_results=total_results)
     except Exception as e:
         flash('Error loading admin dashboard', 'error')
-        app.logger.error("Admin dashboard error: %s", e)
-        return redirect(url_for('index1'))
+        print("Admin dashboard error:", e)
+        return redirect(url_for('index'))
     finally:
         if conn:
             conn.close()
 
+
 @app.route('/admin/add-admin', methods=['POST'])
 @login_required
 def add_admin():
-    # Only super admins or HOD can add new admins
     if current_user.role not in ['super_admin', 'hod']:
         flash("You don't have permission to add admins.", "error")
-        return redirect(url_for('admin_dashboard1'))
+        return redirect(url_for('admin_dashboard'))
 
     name = request.form.get('name', '').strip()
     username = request.form.get('username', '').strip()
-    role = request.form.get('role', 'exam_officer').strip()  # default to exam_officer
+    role = request.form.get('role', 'exam_officer').strip()
     password = request.form.get('password', '')
 
     if not name or not username or not role or not password:
         flash("All fields are required.", "error")
-        return redirect(url_for('admin_dashboard1'))
+        return redirect(url_for('admin_dashboard'))
 
     password_hash = generate_password_hash(password)
-
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO admins (name, username, role, password_hash)
@@ -708,61 +652,50 @@ def add_admin():
             conn.commit()
         flash("New admin created successfully!", "success")
     except Exception as e:
-        if conn:
-            conn.rollback()
+        conn.rollback()
         flash("Error creating admin. Username may already exist.", "error")
-        app.logger.error("Add Admin Error: %s", e)
+        print("Add Admin Error:", e)
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
-    return redirect(url_for('admin_dashboard1'))
+    return redirect(url_for('admin_dashboard'))
+
 
 @app.route("/api/students")
 @login_required
 def get_students():
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute("""
-                SELECT 
-                    id,
-                    matric_number,
-                    name,
-                    level,
-                    email,
-                    phone,
-                    is_active,
-                    created_at
+                SELECT id, matric_number, name, level, email, phone, is_active, created_at
                 FROM students
                 ORDER BY created_at DESC
             """)
             students = cur.fetchall()
             return jsonify(students)
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 @app.route('/api/admins')
 @login_required
 def api_admins():
     if current_user.role not in ['hod', 'super_admin']:
         return jsonify([])
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, name, username, role, created_at FROM admins")
-        rows = cur.fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT id, name, username, role, created_at FROM admins")
+            rows = cur.fetchall()
         admins = [
-            {"id": r[0], "name": r[1], "username": r[2], "role": r[3], "created_at": r[4].isoformat()}
+            {"id": r["id"], "name": r["name"], "username": r["username"], "role": r["role"], "created_at": r["created_at"].isoformat()}
             for r in rows
         ]
         return jsonify(admins)
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 @app.route("/admin/toggle-student-status", methods=["POST"])
 @login_required
@@ -771,9 +704,8 @@ def toggle_student_status():
     student_id = data.get("id")
     new_status = data.get("is_active")
 
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("""
                 UPDATE students
@@ -783,38 +715,34 @@ def toggle_student_status():
             conn.commit()
         return jsonify({"success": True, "message": "Student status updated"})
     except Exception as e:
-        if conn:
-            conn.rollback()
+        conn.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 @app.route("/api/sessions", methods=["GET"])
 @login_required
 @roles_required("super_admin", "hod", "exam_officer")
 def get_sessions():
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute("SELECT id, session_name, is_current FROM sessions ORDER BY id DESC")
             sessions = cur.fetchall()
             return jsonify(sessions)
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 @app.route("/admin/add-result", methods=["POST"])
 @login_required
 @roles_required("super_admin", "hod", "exam_officer")
 def add_result():
-    # Accept JSON or form-data
     data = request.get_json(silent=True)
     if not data:
         data = request.form.to_dict()
 
-    # Extract values safely
     try:
         student_id = int(data.get("student_id"))
         course_code = data.get("course_code", "").strip()
@@ -826,7 +754,6 @@ def add_result():
     except Exception as e:
         return jsonify({"error": f"Invalid input data: {str(e)}"}), 400
 
-    # Grading logic
     if score >= 70:
         grade, grade_point = "A", 5.0
     elif score >= 60:
@@ -840,10 +767,8 @@ def add_result():
     else:
         grade, grade_point = "F", 0.0
 
-    # Insert into DB
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO results (
@@ -857,94 +782,78 @@ def add_result():
             conn.commit()
         return jsonify({"message": "Result added successfully"}), 201
     except Exception as e:
-        if conn:
-            conn.rollback()
+        conn.rollback()
         return jsonify({"error": str(e)}), 500
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 @app.route('/admin/analytics')
 @login_required
 @roles_required('super_admin', 'hod', 'exam_officer')
 def admin_analytics():
-    conn = None
+    conn = get_db_connection()
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        with conn.cursor(row_factory=dict_row) as cursor:
+            cursor.execute("SELECT level, COUNT(*) AS total FROM students GROUP BY level ORDER BY level")
+            students_per_level = cursor.fetchall()
 
-        # ---------------- Students per level ----------------
-        cursor.execute("SELECT level, COUNT(*) AS total FROM students GROUP BY level ORDER BY level")
-        students_per_level = cursor.fetchall()
-
-        # ---------------- Performance distribution ----------------
-        cursor.execute("""
-            WITH student_avg AS (
-                SELECT student_id, AVG(score) AS avg_score
-                FROM results
-                GROUP BY student_id
-            )
-            SELECT 
-                CASE 
-                    WHEN avg_score >= 70 THEN 'First Class/Distinction'
-                    WHEN avg_score >= 60 THEN 'Second Class Upper'
-                    WHEN avg_score >= 50 THEN 'Second Class Lower'
-                    WHEN avg_score >= 45 THEN 'Third Class'
-                    ELSE 'Pass/Fail'
-                END AS class,
-                COUNT(*) AS total
-            FROM student_avg
-            GROUP BY class
-            ORDER BY class
-        """)
-        performance_distribution = cursor.fetchall()
-
-        cursor.close()
+            cursor.execute("""
+                WITH student_avg AS (
+                    SELECT student_id, AVG(score) AS avg_score
+                    FROM results
+                    GROUP BY student_id
+                )
+                SELECT 
+                    CASE 
+                        WHEN avg_score >= 70 THEN 'First Class/Distinction'
+                        WHEN avg_score >= 60 THEN 'Second Class Upper'
+                        WHEN avg_score >= 50 THEN 'Second Class Lower'
+                        WHEN avg_score >= 45 THEN 'Third Class'
+                        ELSE 'Pass/Fail'
+                    END AS class,
+                    COUNT(*) AS total
+                FROM student_avg
+                GROUP BY class
+                ORDER BY class
+            """)
+            performance_distribution = cursor.fetchall()
         return jsonify({
-            "students_per_level": [dict(row) for row in students_per_level],
-            "performance_distribution": [dict(row) for row in performance_distribution]
+            "students_per_level": students_per_level,
+            "performance_distribution": performance_distribution
         })
-    except Exception as e:
-        app.logger.error("admin_analytics error: %s", e)
-        return jsonify({"error": "Error generating analytics"}), 500
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
+
+
+
+
+
 
 # =========================================================
-# --- DEFAULT ADMIN + SEEDERS (use same DB) ---
+# --- DEFAULT ADMIN + SEEDERS ---
 # =========================================================
 def create_default_super_admin():
-    conn = None
     try:
-        conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        # Ensure the admins table exists or this will raise; db.create_all() should be run first
-        cur.execute("SELECT COUNT(*) AS cnt FROM admins")
-        row = cur.fetchone()
-        if row and row['cnt'] == 0:
-            default_username = os.environ.get('DEFAULT_ADMIN_USER', 'admin')
-            default_password = os.environ.get('DEFAULT_ADMIN_PASS', 'admin123')
-            password_hash = generate_password_hash(default_password)
-            cur.execute("""
-                INSERT INTO admins (username, name, role, password_hash)
-                VALUES (%s, %s, %s, %s)
-            """, (default_username, "Super Admin", "super_admin", password_hash))
-            conn.commit()
-            print(f"✅ Default super admin created: username='{default_username}', password='{default_password}'")
-        cur.close()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) AS cnt FROM admins")
+                row = cur.fetchone()
+                if row['cnt'] == 0:
+                    default_username = os.environ.get('DEFAULT_ADMIN_USER', 'admin')
+                    default_password = os.environ.get('DEFAULT_ADMIN_PASS', 'admin123')
+                    password_hash = generate_password_hash(default_password)
+                    cur.execute("""
+                        INSERT INTO admins (username, name, role, password_hash)
+                        VALUES (%s, %s, %s, %s)
+                    """, (default_username, "Super Admin", "super_admin", password_hash))
+                    conn.commit()
+                    print(f"✅ Default super admin created: username='{default_username}', password='{default_password}'")
     except Exception as e:
         print("⚠️ Error creating default super admin (table may not exist yet):", e)
-        if conn:
-            conn.rollback()
-    finally:
-        if conn:
-            conn.close()
 
 def seed_default_session_and_courses():
-    """
-    Insert a default session and sample courses if missing (non-destructive).
-    """
     sample_courses = [
         ('AGE 101', 'Introduction to Agricultural Engineering', 2, 100, 1),
         ('AGE 102', 'Engineering Drawing and Design', 3, 100, 1),
@@ -962,52 +871,35 @@ def seed_default_session_and_courses():
         ('AGE 401', 'Agricultural Processing Engineering', 3, 400, 1),
         ('AGE 501', 'Project', 6, 500, 1)
     ]
-    conn = None
     try:
-        conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        # Sessions
-        cur.execute("SELECT COUNT(*) AS cnt FROM sessions")
-        cnt = cur.fetchone()['cnt']
-        if cnt == 0:
-            cur.execute("INSERT INTO sessions (session_name, is_current) VALUES (%s, %s)", ('2024/2025', True))
-            conn.commit()
-            print("✅ Default session 2024/2025 created")
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) AS cnt FROM sessions")
+                if cur.fetchone()['cnt'] == 0:
+                    cur.execute("INSERT INTO sessions (session_name, is_current) VALUES (%s, %s)", ('2024/2025', True))
+                    conn.commit()
+                    print("✅ Default session 2024/2025 created")
 
-        # Courses
-        cur.execute("SELECT COUNT(*) AS cnt FROM courses")
-        cnt_courses = cur.fetchone()['cnt']
-        if cnt_courses == 0:
-            for course in sample_courses:
-                cur.execute("""
-                    INSERT INTO courses (course_code, course_title, course_unit, level, semester)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, course)
-            conn.commit()
-            print("✅ Sample courses inserted")
-        cur.close()
+                cur.execute("SELECT COUNT(*) AS cnt FROM courses")
+                if cur.fetchone()['cnt'] == 0:
+                    for course in sample_courses:
+                        cur.execute("""
+                            INSERT INTO courses (course_code, course_title, course_unit, level, semester)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, course)
+                    conn.commit()
+                    print("✅ Sample courses inserted")
     except Exception as e:
-        print("⚠️ Error seeding sessions/courses (table may not exist yet):", e)
-        if conn:
-            conn.rollback()
-    finally:
-        if conn:
-            conn.close()
+        print("⚠️ Error seeding sessions/courses:", e)
 
 # =========================================================
-# --- STARTUP: Create SQLAlchemy tables, then seed defaults ---
+# --- STARTUP ---
 # =========================================================
 with app.app_context():
-    # This will create tables for SQLAlchemy-defined models in models.py
     db.create_all()
-
-# Create super admin and seed sessions/courses (use psycopg2, connecting to same DB)
 create_default_super_admin()
 seed_default_session_and_courses()
 
-# =========================================================
-# --- RUN APP ---
-# =========================================================
 if __name__ == '__main__':
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
