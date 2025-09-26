@@ -494,7 +494,7 @@ def check_student_active():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for(
-            'student_dashboard' if current_user.role == 'student' else 'admin_dashboard'
+            'student_dashboard' if current_user.role == 'student' else 'admin_dashboard1'
         ))
 
     if request.method == 'POST':
@@ -544,7 +544,7 @@ def login():
 
                 login_user(user, remember=True)
                 next_page = request.args.get('next')
-                return redirect(next_page or url_for('admin_dashboard'))
+                return redirect(next_page or url_for('admin_dashboard1'))
 
             flash('Invalid login credentials', 'error')
         except Exception as e:
@@ -603,7 +603,7 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('index1'))
 
 @app.route('/student/dashboard')
 @roles_required('student')
@@ -642,7 +642,7 @@ def student_dashboard():
     except Exception as e:
         flash('Error loading dashboard', 'error')
         app.logger.error("Student dashboard error: %s", e)
-        return redirect(url_for('index'))
+        return redirect(url_for('index1'))
     finally:
         if conn:
             conn.close()
@@ -664,7 +664,7 @@ def admin_dashboard():
         pending_students = cur.fetchone()['cnt']
         cur.execute("SELECT COUNT(*) AS cnt FROM results")
         total_results = cur.fetchone()['cnt']
-        return render_template('admin_dashboard.html',
+        return render_template('admin_dashboard1.html',
                                total_students=total_students,
                                active_students=active_students,
                                pending_students=pending_students,
@@ -672,7 +672,7 @@ def admin_dashboard():
     except Exception as e:
         flash('Error loading admin dashboard', 'error')
         app.logger.error("Admin dashboard error: %s", e)
-        return redirect(url_for('index'))
+        return redirect(url_for('index1'))
     finally:
         if conn:
             conn.close()
@@ -683,7 +683,7 @@ def add_admin():
     # Only super admins or HOD can add new admins
     if current_user.role not in ['super_admin', 'hod']:
         flash("You don't have permission to add admins.", "error")
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('admin_dashboard1'))
 
     name = request.form.get('name', '').strip()
     username = request.form.get('username', '').strip()
@@ -692,7 +692,7 @@ def add_admin():
 
     if not name or not username or not role or not password:
         flash("All fields are required.", "error")
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('admin_dashboard1'))
 
     password_hash = generate_password_hash(password)
 
@@ -716,7 +716,7 @@ def add_admin():
         if conn:
             conn.close()
 
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard1'))
 
 @app.route("/api/students")
 @login_required
