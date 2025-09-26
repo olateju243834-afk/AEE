@@ -25,113 +25,6 @@ from psycopg.rows import dict_row
 from models import db, Admin, Student, Session, Course, Result, Contact, Payment
 
 
-
-# =========================================================
-# --- STARTUP & DB SEEDING (Render / Heroku friendly) ---
-# =========================================================
-def init_db(app):
-    """
-    Ensures all tables exist and default records are seeded safely.
-    """
-    with app.app_context():
-        # 1️⃣ Create all tables if they don't exist
-        try:
-            db.create_all()
-            print("✅ All tables ensured.")
-        except Exception as e:
-            print("❌ Error creating tables:", e)
-            raise
-
-        # 2️⃣ Seed default super admin
-        from werkzeug.security import generate_password_hash
-        default_username = os.environ.get('DEFAULT_ADMIN_USER', 'admin')
-        default_password = os.environ.get('DEFAULT_ADMIN_PASS', 'admin123')
-        if not Admin.query.filter_by(username=default_username).first():
-            try:
-                admin = Admin(
-                    username=default_username,
-                    name="Super Admin",
-                    role="super_admin",
-                )
-                admin.password_hash = generate_password_hash(default_password)
-                db.session.add(admin)
-                db.session.commit()
-                print(f"✅ Default super admin created: {default_username} / {default_password}")
-            except Exception as e:
-                db.session.rollback()
-                print("⚠️ Error creating default super admin:", e)
-
-        # 3️⃣ Seed default session
-        if not Session.query.filter_by(session_name="2024/2025").first():
-            try:
-                session = Session(session_name="2024/2025", is_current=True)
-                db.session.add(session)
-                db.session.commit()
-                print("✅ Default session 2024/2025 created")
-            except Exception as e:
-                db.session.rollback()
-                print("⚠️ Error creating default session:", e)
-
-        # 4️⃣ Seed sample courses (if table empty)
-        if Course.query.count() == 0:
-            sample_courses = [
-                ("AGE 101", "Introduction to Agricultural Engineering", 2, 100, 1),
-                ("AGE 102", "Engineering Drawing and Design", 3, 100, 1),
-                ("AGE 103", "Mathematics for Engineers I", 3, 100, 1),
-                ("AGE 104", "Physics for Engineers", 3, 100, 1),
-                ("AGE 105", "Chemistry for Engineers", 3, 100, 1),
-                ("AGE 111", "Workshop Technology", 2, 100, 2),
-                ("AGE 112", "Mathematics for Engineers II", 3, 100, 2),
-                ("AGE 113", "Engineering Mechanics", 3, 100, 2),
-                ("AGE 201", "Fluid Mechanics", 3, 200, 1),
-                ("AGE 202", "Strength of Materials", 3, 200, 1),
-                ("AGE 203", "Thermodynamics", 3, 200, 1),
-                ("AGE 301", "Farm Power and Machinery", 3, 300, 1),
-                ("AGE 302", "Soil and Water Engineering", 3, 300, 1),
-                ("AGE 401", "Agricultural Processing Engineering", 3, 400, 1),
-                ("AGE 501", "Project", 6, 500, 1),
-            ]
-            try:
-                for code, title, unit, level, semester in sample_courses:
-                    db.session.add(
-                        Course(
-                            course_code=code,
-                            course_title=title,
-                            course_unit=unit,
-                            level=level,
-                            semester=semester
-                        )
-                    )
-                db.session.commit()
-                print("✅ Sample courses inserted")
-            except Exception as e:
-                db.session.rollback()
-                print("⚠️ Error inserting sample courses:", e)
-
-        print("✅ DB initialization & seeding completed.")
-
-
-# =========================================================
-# --- SINGLE ENTRY POINT ---
-# =========================================================
-if __name__ == "__main__":
-    # 1️⃣ Ensure environment variables are set
-    if not os.environ.get("SESSION_SECRET"):
-        raise RuntimeError("SESSION_SECRET environment variable must be set")
-    if not os.environ.get("DATABASE_URL"):
-        raise RuntimeError("DATABASE_URL environment variable must be set")
-
-    # 2️⃣ Initialize DB & seed defaults
-    init_db(app)
-
-    # 3️⃣ Run Flask app
-    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=debug_mode)
-
-
-
-
 # =========================================================
 # --- CONFIGURATION ---
 # =========================================================
@@ -356,9 +249,7 @@ def payment():
 def academic_program():
     return render_template('academic_program.html')
 
-# --- Contact, payment, result portal, login, register routes ---
-# The rest of your routes remain unchanged in logic
-# Only psycopg2 calls replaced with psycopg, using `with get_db_connection() as conn:`
+# --- Contact, payment, result portal, login, register routes ---`
 @app.route('/contact', methods=['POST'])
 def contact():
     try:
@@ -941,10 +832,6 @@ def admin_analytics():
 
 
 
-
-
-
-
 # =========================================================
 # --- DEFAULT ADMIN + SEEDERS ---
 # =========================================================
@@ -1006,14 +893,6 @@ def seed_default_session_and_courses():
     except Exception as e:
         print("⚠️ Error seeding sessions/courses:", e)
 
-# =========================================================
-# --- STARTUP ---
-# =========================================================
-with app.app_context():
-    db.create_all()
-if __name__ == '__main__':
-    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
 
 # ------------------- Robust DB Initialization & Seeding -------------------
 def init_db(app):
