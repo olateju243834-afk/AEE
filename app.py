@@ -22,7 +22,7 @@ import psycopg
 from psycopg.rows import dict_row
 
 # Local models for main site (make sure this file exists and contains your models)
-from models import db, Admin, Student, Session, Course, Result, Contact, Payment
+from models import db, Admin, Students, Session, Course, Result, Contact, Payment
 
 
 # =========================================================
