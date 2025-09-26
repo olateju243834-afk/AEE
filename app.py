@@ -1011,9 +1011,6 @@ def seed_default_session_and_courses():
 # =========================================================
 with app.app_context():
     db.create_all()
-create_default_super_admin()
-seed_default_session_and_courses()
-
 if __name__ == '__main__':
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
