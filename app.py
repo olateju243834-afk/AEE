@@ -476,7 +476,7 @@ def submit_payment():
 @app.before_request
 def check_student_active():
     # Skip login, register, index, static
-    if request.endpoint in ['login', 'register', 'index', 'static']:
+    if request.endpoint in ['login', 'register', 'index1', 'static']:
         return
 
     # Skip admin routes entirely for any admin-like role
