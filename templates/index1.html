@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Agricultural and Environmental Engineering{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+          <div class="login-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AEE Logo">
+</div>
+        <h1 class="login-title">Welcome</h1>
+        <p class="login-subtitle">Agricultural & Environmental Engineering<br>University of Ibadan</p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+        </div>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <p class="text-muted" style="font-size: 0.9rem;">
+                Student Result Management Portal<br>
+                For questions, contact the department office.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

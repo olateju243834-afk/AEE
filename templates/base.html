@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Agricultural and Environmental Engineering - University of Ibadan{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                 <div class="login-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AEE Logo">
+</div>
+                <div class="header-text">
+                    <h1>Agricultural & Environmental Engineering</h1>
+                    <p>University of Ibadan, Nigeria</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <span>Welcome, {{ current_user.name }}</span>
+                {% if current_user.role == 'student' %}
+                <span class="text-muted">{{ current_user.matric_number }} | Level {{ current_user.level }}</span>
+                {% else %}
+                <span class="text-muted">{{ current_user.role.replace('_', ' ').title() }}</span>
+                {% endif %}
+                <form method="POST" action="{{ url_for('logout') }}" style="display: inline;">
+                   <button type="submit" class="logout-btn" style="border: none; background: none; padding: 0; cursor: pointer;">Logout</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+    
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+</html>

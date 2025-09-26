@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Agricultural and Environmental Engineering{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_students }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ active_students }}</div>
+        <div class="stat-label">Active Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ pending_students }}</div>
+        <div class="stat-label">Pending Approval</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_results }}</div>
+        <div class="stat-label">Total Results</div>
+    </div>
+</div>
+
+<div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('results')">Manage Results</button>
+    <button class="nav-tab" onclick="showTab('students')">Manage Students</button>
+    {% if current_user.role in ['hod', 'super_admin'] %}
+    <button class="nav-tab" onclick="showTab('admins')">Manage Admins</button>
+    {% endif %}
+    <button class="nav-tab" onclick="showTab('analytics')">Analytics</button>
+</div>
+
+<!-- Results Management -->
+<div id="results-tab" class="card">
+    <div class="card-header">
+        <h2>Result Management</h2>
+        <p>Add individual results or upload bulk results from CSV/Excel</p>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button class="btn" onclick="showManualEntry()">Manual Entry</button>
+        <button class="btn btn-secondary" onclick="showBulkUpload()">Bulk Upload (CSV/Excel)</button>
+    </div>
+    
+    <!-- Manual Entry Form -->
+    <div id="manual-entry" style="display: none;">
+        <h3>Manual Result Entry</h3>
+        <form id="manualResultForm" method="POST" action="/admin/add-result">
+            <input type="hidden">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label for="student_select">Student</label>
+                    <select id="student_select" name="student_id" class="form-control form-select" required>
+                        <option value="">Select Student...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="session_select">Academic Session</label>
+                    <select id="session_select" name="session_id" class="form-control form-select" required>
+                        <option value="">Select Session...</option>
+                        <option value="1">2023/2024</option>
+                        <option value="2">2024/2025</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="semester_select">Semester</label>
+                    <select id="semester_select" name="semester" class="form-control form-select" required>
+                        <option value="">Select Semester...</option>
+                        <option value="1">First Semester</option>
+                        <option value="2">Second Semester</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="course_code">Course Code</label>
+                    <input type="text" id="course_code" name="course_code" class="form-control" required placeholder="e.g., AGE 101">
+                </div>
+                <div class="form-group">
+                    <label for="course_title">Course Title</label>
+                    <input type="text" id="course_title" name="course_title" class="form-control" required placeholder="Course Title">
+                </div>
+                <div class="form-group">
+                    <label for="course_unit">Course Unit</label>
+                    <input type="number" id="course_unit" name="course_unit" class="form-control" required min="1" max="6">
+                </div>
+                <div class="form-group">
+                    <label for="score">Score</label>
+                    <input type="number" id="score" name="score" class="form-control" required min="0" max="100">
+                </div>
+            </div>
+            <button type="submit" class="btn">Add Result</button>
+        </form>
+    </div>
+    
+    <!-- Bulk Upload Form -->
+    <div id="bulk-upload" style="display: none;">
+        <h3>Bulk Result Upload</h3>
+        <div class="alert alert-info">
+            <strong>CSV Format:</strong> student_matric, course_code, course_title, course_unit, score, semester, session<br>
+            <strong>Example:</strong> U21/AGE/1001, AGE 101, Introduction to Agricultural Engineering, 2, 85, 1, 2024/2025
+        </div>
+        <form id="bulkUploadForm" method="POST" action="/admin/bulk-upload" enctype="multipart/form-data">
+            <input type="hidden">
+            <div class="form-group">
+                <label for="csv_file">Select CSV/Excel File</label>
+                <input type="file" id="csv_file" name="csv_file" class="form-control" accept=".csv,.xlsx,.xls" required>
+            </div>
+            <button type="submit" class="btn">Upload Results</button>
+        </form>
+    </div>
+</div>
+
+<!-- Students Management -->
+<div id="students-tab" class="card" style="display: none;">
+    <div class="card-header">
+        <h2>Student Management</h2>
+        <p>Activate, deactivate, and manage student accounts</p>
+    </div>
+    
+    <div id="studentsTable">
+        <!-- This will be loaded dynamically -->
+        <p class="text-center">Loading students...</p>
+    </div>
+</div>
+
+<!-- Admin Management (HOD and Super Admin only) -->
+{% if current_user.role in ['hod', 'super_admin'] %}
+<div id="admins-tab" class="card" style="display: none;">
+    <div class="card-header">
+        <h2>Admin Management</h2>
+        <p>Create and manage admin accounts</p>
+    </div>
+    
+    <button class="btn mb-3" onclick="showAddAdminForm()">Add New Admin</button>
+    
+    <div id="add-admin-form" style="display: none; margin-bottom: 2rem;">
+        <h3>Add New Admin</h3>
+        <form method="POST" action="/admin/add-admin">
+            <input type="hidden">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label for="admin_name">Full Name</label>
+                    <input type="text" id="admin_name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin_username">Username</label>
+                    <input type="text" id="admin_username" name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin_role">Role</label>
+                    <select id="admin_role" name="role" class="form-control form-select" required>
+                        <option value="">Select Role...</option>
+                        <option value="exam_officer">Exam Officer</option>
+                        {% if current_user.role == 'super_admin' %}
+                        <option value="hod">Head of Department</option>
+                        <option value="super_admin">Technical Admin</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="admin_password">Password</label>
+                    <input type="password" id="admin_password" name="password" class="form-control" required>
+                </div>
+            </div>
+            <button type="submit" class="btn">Create Admin</button>
+            <button type="button" class="btn btn-secondary" onclick="hideAddAdminForm()">Cancel</button>
+        </form>
+    </div>
+    
+    <div id="adminsTable">
+        <!-- This will be loaded dynamically -->
+        <p class="text-center">Loading admins...</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Analytics -->
+<div id="analytics-tab" class="card" style="display: none;">
+    <div class="card-header">
+        <h2>Department Analytics</h2>
+        <p>Performance statistics and insights</p>
+    </div>
+    
+    <div id="analyticsContent">
+        <!-- This will be loaded dynamically -->
+        <p class="text-center">Loading analytics...</p>
+    </div>
+</div>
+
+<a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Tab switching functionality
+function showTab(tabName) {
+    const tabs = document.querySelectorAll('.card');
+    tabs.forEach(tab => {
+        if (tab.id.endsWith('-tab')) {
+            tab.style.display = 'none';
+        }
+    });
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    const tabButtons = document.querySelectorAll('.nav-tab');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    if (tabName === 'students') {
+        loadStudents();
+    } else if (tabName === 'admins') {
+        loadAdmins();
+    } else if (tabName === 'analytics') {
+        loadAnalytics();
+    }
+}
+
+function showManualEntry() {
+    document.getElementById('manual-entry').style.display = 'block';
+    document.getElementById('bulk-upload').style.display = 'none';
+    loadFormData();
+}
+
+function showBulkUpload() {
+    document.getElementById('manual-entry').style.display = 'none';
+    document.getElementById('bulk-upload').style.display = 'block';
+}
+
+function showAddAdminForm() {
+    document.getElementById('add-admin-form').style.display = 'block';
+}
+function hideAddAdminForm() {
+    document.getElementById('add-admin-form').style.display = 'none';
+}
+
+function loadFormData() {
+    fetch('/api/students')
+        .then(response => response.json())
+        .then(students => {
+            const studentSelect = document.getElementById('student_select');
+            studentSelect.innerHTML = '<option value="">Select Student...</option>';
+            students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} (${student.matric_number})`;
+                option.dataset.level = student.level;
+                studentSelect.appendChild(option);
+            });
+        });
+    fetch('/api/sessions')
+        .then(response => response.json())
+        .then(sessions => {
+            const sessionSelect = document.getElementById('session_select');
+            sessionSelect.innerHTML = '<option value="">Select Session...</option>';
+            sessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session.id;
+                option.textContent = session.session_name;
+                sessionSelect.appendChild(option);
+            });
+        });
+}
+
+function loadStudents() {
+    fetch('/api/students')
+        .then(response => response.json())
+        .then(students => {
+            const tableHtml = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Matric Number</th>
+                                <th>Level</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.map(student => `
+                                <tr>
+                                    <td>${student.name}</td>
+                                    <td>${student.matric_number}</td>
+                                    <td>${student.level}L</td>
+                                    <td>${student.email}</td>
+                                    <td>
+                                        <span class="${student.is_active ? 'text-success' : 'text-danger'}">
+                                            ${student.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn ${student.is_active ? 'btn-warning' : 'btn-success'}" 
+                                                onclick="toggleStudentStatus(${student.id}, ${student.is_active})">
+                                            ${student.is_active ? 'Deactivate' : 'Activate'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('studentsTable').innerHTML = tableHtml;
+        })
+        .catch(() => {
+            document.getElementById('studentsTable').innerHTML = '<p class="text-center text-danger">Error loading students</p>';
+        });
+}
+
+function loadAdmins() {
+    fetch('/api/admins')
+        .then(response => response.json())
+        .then(admins => {
+            const tableHtml = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${admins.map(admin => `
+                                <tr>
+                                    <td>${admin.name}</td>
+                                    <td>${admin.username}</td>
+                                    <td>${admin.role}</td>
+                                    <td>${admin.created_at}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('adminsTable').innerHTML = tableHtml;
+        })
+        .catch(() => {
+            document.getElementById('adminsTable').innerHTML = '<p class="text-center text-danger">Error loading admins</p>';
+        });
+}
+
+function loadAnalytics() {
+    fetch('/admin/analytics')
+        .then(response => response.json())
+        .then(data => {
+            const content = document.getElementById('analyticsContent');
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            `;
+
+            // Students per level
+            const levelCtx = document.getElementById('levelChart').getContext('2d');
+            new Chart(levelCtx, {
+                type: 'pie',
+                data: {
+                    labels: data.students_per_level.map(l => l.level),
+                    datasets: [{
+                        label: 'Students',
+                        data: data.students_per_level.map(l => l.total),
+                        backgroundColor: ['#0B5D1E', '#198754', '#FFC107', '#DC3545']
+                    }]
+                }
+            });
+
+            // Performance distribution
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.performance_distribution.map(p => p.class),
+                    datasets: [{
+                        label: 'Performance',
+                        data: data.performance_distribution.map(p => p.total),
+                        backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#fd7e14', '#dc3545']
+                    }]
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading analytics:', error);
+            document.getElementById('analyticsContent').innerHTML =
+                '<p class="text-center text-danger">Error loading analytics data</p>';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    showTab('results');
+});
+</script>
+{% endblock %}

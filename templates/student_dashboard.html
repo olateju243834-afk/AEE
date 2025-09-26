@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - {{ student_name }}{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ level }}L</div>
+        <div class="stat-label">Current Level</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ "%.2f"|format(cgpa) }}</div>
+        <div class="stat-label">Overall CGPA</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ results|length }}</div>
+        <div class="stat-label">Total Courses</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Academic Results</h2>
+        <p>Your complete academic record for all semesters</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showAllResults()">All Results</button>
+        <button class="nav-tab" onclick="filterBySemester(1)">First Semester</button>
+        <button class="nav-tab" onclick="filterBySemester(2)">Second Semester</button>
+    </div>
+    
+    {% if results %}
+    <div class="table-container">
+        <table class="table" id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Session</th>
+                    <th>Semester</th>
+                    <th>Course Code</th>
+                    <th>Course Title</th>
+                    <th>Unit</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr data-semester="{{ result.semester }}">
+                    <td>{{ result.session_name }}</td>
+                    <td>{{ result.semester }}</td>
+                    <td><strong>{{ result.course_code }}</strong></td>
+                    <td>{{ result.course_title }}</td>
+                    <td>{{ result.course_unit }}</td>
+                    <td>{{ result.score }}</td>
+                    <td>
+                        <span class="{% if result.grade == 'F' %}text-danger{% elif result.grade in ['A', 'B'] %}text-success{% else %}text-warning{% endif %}">
+                            {{ result.grade }}
+                        </span>
+                    </td>
+                    <td>{{ "%.2f"|format(result.correct_grade_point) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-3 text-center">
+        <button class="btn btn-secondary" onclick="downloadResults()">Download PDF</button>
+        <button class="btn btn-secondary" onclick="printResults()">Print Results</button>
+    </div>
+    {% else %}
+    <div class="text-center" style="padding: 3rem;">
+        <h3 class="text-muted">No Results Available</h3>
+        <p class="text-muted">Your results have not been uploaded yet. Please check back later.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Semester Performance</h2>
+        <p>GPA breakdown by semester</p>
+    </div>
+    
+    <div id="semesterStats">
+        {% if results %}
+        <div class="stats-grid">
+            {% set semesters = {} %}
+            {% for result in results %}
+                {% set key = result.session_name + " - Semester " + result.semester|string %}
+                {% if key not in semesters %}
+                    {% set _ = semesters.update({key: {'total_points': 0, 'total_units': 0, 'courses': []}}) %}
+                {% endif %}
+                {% set _ = semesters[key]['courses'].append(result) %}
+            {% endfor %}
+            
+            {% for semester, data in semesters.items() %}
+                {% set total_points = 0 %}
+                {% set total_units = 0 %}
+                {% for course in data.courses %}
+                    {% set total_points = total_points + (course.correct_grade_point * course.course_unit) %}
+                    {% set total_units = total_units + course.course_unit %}
+                {% endfor %}
+                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                    <div class="stat-number">{{ "%.2f"|format(total_points / total_units if total_units > 0 else 0) }}</div>
+                    <div class="stat-label">{{ semester }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted text-center">No semester data available yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+
+
+<script>
+function showAllResults() {
+    const rows = document.querySelectorAll('#resultsTable tbody tr');
+    rows.forEach(row => row.style.display = '');
+    updateActiveTab(event.target);
+}
+
+function filterBySemester(semester) {
+    const rows = document.querySelectorAll('#resultsTable tbody tr');
+    rows.forEach(row => {
+        if (row.dataset.semester == semester) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    updateActiveTab(event.target);
+}
+
+function updateActiveTab(activeTab) {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    activeTab.classList.add('active');
+}
+
+
+function downloadResults() {
+    const printContent = document.getElementById('resultsTable').outerHTML;
+    const printWindow = window.open('', '', 'height=600,width=800');
+
+    printWindow.document.write('<html><head><title>Academic Results</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #0B5D1E; color: white; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; color: #0B5D1E; }
+        .header h2 { margin: 5px 0; color: #333; }
+        .header p { margin: 5px 0; color: #666; }
+        .logo { height: 80px; margin-bottom: 10px; }
+        .student-info { margin-top: 15px; text-align: left; }
+    `);
+    printWindow.document.write('</style></head><body>');
+
+    // New Header with Logo + Dept + University
+    printWindow.document.write('<div class="header">');
+    printWindow.document.write('<img src="/static/images/logo.png" class="logo" alt="University Logo">');
+    printWindow.document.write('<h1>University of Ibadan</h1>');
+    printWindow.document.write('<h2>Department of Agricultural & Environmental Engineering</h2>');
+    printWindow.document.write('<p><strong>Academic Results</strong></p>');
+    printWindow.document.write('</div>');
+
+    // Student Info
+    printWindow.document.write('<div class="student-info">');
+    printWindow.document.write('<p><strong>Name:</strong> {{ student_name }}</p>');
+    printWindow.document.write('<p><strong>Matric Number:</strong> {{ matric_number }}</p>');
+    printWindow.document.write('<p><strong>Level:</strong> {{ level }}</p>');
+    printWindow.document.write('<p><strong>CGPA:</strong> {{ "%.2f"|format(cgpa) }}</p>');
+    printWindow.document.write('</div>');
+
+    // Results Table
+    printWindow.document.write(printContent);
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function printResults() {
+    downloadResults();
+}
+</script>
+{% endblock %}
