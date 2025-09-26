@@ -73,7 +73,7 @@
                 </div>
                 <div class="form-group">
                     <label for="course_code">Course Code</label>
-                    <input type="text" id="course_code" name="course_code" class="form-control" required placeholder="e.g., AGE 101">
+                    <input type="text" id="course_code" name="course_code" class="form-control" required placeholder="e.g., TAE 211">
                 </div>
                 <div class="form-group">
                     <label for="course_title">Course Title</label>
@@ -97,7 +97,7 @@
         <h3>Bulk Result Upload</h3>
         <div class="alert alert-info">
             <strong>CSV Format:</strong> student_matric, course_code, course_title, course_unit, score, semester, session<br>
-            <strong>Example:</strong> U21/AGE/1001, AGE 101, Introduction to Agricultural Engineering, 2, 85, 1, 2024/2025
+            <strong>Example:</strong> TAE 211 Introduction to Agricultural Engineering, 2024/2025
         </div>
         <form id="bulkUploadForm" method="POST" action="/admin/bulk-upload" enctype="multipart/form-data">
             <input type="hidden">
@@ -152,7 +152,7 @@
                         <option value="">Select Role...</option>
                         <option value="exam_officer">Exam Officer</option>
                         {% if current_user.role == 'super_admin' %}
-                        <option value="hod">Head of Department</option>
+                        
                         <option value="super_admin">Technical Admin</option>
                         {% endif %}
                     </select>
