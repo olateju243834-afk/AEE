@@ -1,13 +1,9 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ------------------- Base + DB -------------------
-class Base(DeclarativeBase):
-    pass
-
-db = SQLAlchemy(model_class=Base)
+# ------------------- DB -------------------
+db = SQLAlchemy()
 
 # ------------------- Main Website Models -------------------
 class Contact(db.Model):
@@ -44,6 +40,7 @@ class Payment(db.Model):
 
 # ------------------- Result Portal Models -------------------
 class Student(db.Model):
+    __tablename__ = "students"  # force table name to match queries
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     matric_number = db.Column(db.String(20), unique=True, nullable=False, index=True)
@@ -99,7 +96,7 @@ class Course(db.Model):
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(
-        db.Integer, db.ForeignKey("student.id", ondelete="CASCADE"), nullable=False
+        db.Integer, db.ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     course_code = db.Column(db.String(20), nullable=False)
     course_title = db.Column(db.String(200), nullable=False)
