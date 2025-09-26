@@ -962,9 +962,18 @@ def init_db(app):
 
         print("✅ DB initialization & seeding completed.")
 
-
-# ------------------- Usage -------------------
-# Place this at the bottom of your main app.py or entry script
+# =========================================================
+# ------------------- APP START --------------------------
+# =========================================================
 if __name__ == "__main__":
-    init_db(app)
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # 1️⃣ Ensure all tables exist and seed default records
+    try:
+        init_db(app)
+    except Exception as e:
+        print("❌ Failed to initialize DB:", e)
+        # Depending on your deployment, you may want to exit here:
+        # import sys; sys.exit(1)
+
+    # 2️⃣ Start Flask app
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
