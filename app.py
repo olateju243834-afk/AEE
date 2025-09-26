@@ -44,7 +44,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # --- DATABASE CONFIG (SQLAlchemy) ---
 # =========================================================
 db_url = os.environ.get("DATABASE_URL") or \
-    "postgresql+psycopg://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
+    "postgresql://agricdb_user:cr7loxFwGCvhjXV0PEI4MfrtOn4crF5y@dpg-d3b3ul3ipnbc73fie560-a/agricdb"
 
 # Normalize known prefixes for SQLAlchemy + psycopg v3
 if db_url.startswith("postgres://"):
