@@ -40,12 +40,19 @@ app.secret_key = session_secret
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-
 # =========================================================
 # --- DATABASE CONFIG (SQLAlchemy) ---
 # =========================================================
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or \
+db_url = os.environ.get("DATABASE_URL") or \
     "postgresql+psycopg://aeedb_user:pbZRHWCMGvkRMMtzYyIMEBqVJdprYPrp@dpg-d2m57uv5r7bs73ebqv40-a/aeedb"
+
+# Normalize known prefixes for SQLAlchemy + psycopg v3
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+elif db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_recycle": 300, "pool_pre_ping": True}
 db.init_app(app)
 
@@ -57,15 +64,14 @@ def get_db_connection():
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable must be set")
 
-    # Normalize known prefixes
-    if db_url.startswith("postgresql+psycopg://"):
-        db_url = db_url.replace("postgresql+psycopg://", "postgresql://", 1)
+    # Normalize known prefixes for raw psycopg usage
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
+    elif db_url.startswith("postgresql+psycopg://"):
+        db_url = db_url.replace("postgresql+psycopg://", "postgresql://", 1)
 
     # psycopg v3 can accept full URL directly
     return psycopg.connect(db_url, row_factory=dict_row, autocommit=False)
-
 # =========================================================
 # --- MAIL CONFIG ---
 # =========================================================
