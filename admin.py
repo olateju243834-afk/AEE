@@ -58,7 +58,7 @@ def dashboard():
     recent_contacts = Contact.query.order_by(Contact.created_at.desc()).limit(5).all()
     recent_payments = Payment.query.order_by(Payment.created_at.desc()).limit(5).all()
     
-    return render_template('admin/dashboard.html', 
+    return render_template('admin/admin_dashboard.html', 
                          total_contacts=total_contacts,
                          total_payments=total_payments,
                          pending_payments=pending_payments,
