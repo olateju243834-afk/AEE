@@ -421,7 +421,9 @@ def submit_payment():
     except Exception as e:
         db.session.rollback()
         app.logger.error(f"Error processing payment: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error processing payment. Please try again.'})
+        print("❌ PAYMENT ERROR:", str(e))
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
 
 # =========================================================
 # --- RESULT PORTAL ROUTES (preserve all provided handlers) ---
