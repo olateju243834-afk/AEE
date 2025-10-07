@@ -32,6 +32,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
+app.config['UPLOAD_FOLDER'] = 'uploads/receipts'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
 # Secret Key
 session_secret = os.environ.get("SESSION_SECRET")
 if not session_secret:
