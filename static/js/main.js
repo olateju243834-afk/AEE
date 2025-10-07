@@ -240,6 +240,76 @@ function initializeSmoothScrolling() {
 }
 
 /**
+Newly added function for payment submission
+*/
+document.addEventListener('DOMContentLoaded', () => {
+    const submitBtn = document.getElementById('submitPayment');
+    if (!submitBtn) return; // stop if button doesn't exist
+
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        // collect the form data
+        const formData = new FormData();
+
+        // collect student details
+        formData.append('fullName', document.getElementById('fullName').value.trim());
+        formData.append('matricNumber', document.getElementById('matricNumber').value.trim());
+        formData.append('level', document.getElementById('level').value.trim());
+        formData.append('email', document.getElementById('email').value.trim());
+        formData.append('phoneNumber', document.getElementById('phoneNumber').value.trim());
+        formData.append('transactionRef', document.getElementById('transactionRef').value.trim());
+        formData.append('paymentDate', document.getElementById('paymentDate').value);
+
+        // handle file upload
+        const receiptFile = document.getElementById('paymentReceipt').files[0];
+        if (receiptFile) formData.append('receipt', receiptFile);
+
+        // collect selected payment items
+        const selectedItems = [];
+        document.querySelectorAll('.payment-checkbox:checked').forEach(cb => {
+            selectedItems.push({
+                name: cb.dataset.name,
+                amount: parseFloat(cb.value)
+            });
+        });
+        formData.append('paymentItems', JSON.stringify(selectedItems));
+
+        // calculate total (₦8,000 base + selected)
+        const totalAmount = selectedItems.reduce((sum, item) => sum + item.amount, 8000);
+        formData.append('totalAmount', totalAmount);
+
+        // debug log
+        console.log('Submitting payment data:', Object.fromEntries(formData));
+
+        try {
+            const res = await fetch('/submit-payment', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert(`✅ ${data.message}`);
+                window.location.href = '/'; // optional redirect after success
+            } else {
+                alert(`❌ Error: ${data.error}`);
+            }
+        } catch (err) {
+            console.error('Payment submission failed:', err);
+            alert('⚠️ Failed to connect to the server.');
+        }
+    });
+});
+
+
+
+
+
+
+
+/**
  * Initialize flash message handling
  */
 function initializeFlashMessageHandling() {
