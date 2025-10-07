@@ -35,7 +35,7 @@ def login():
         else:
             flash('Invalid credentials!', 'error')
     
-    return render_template('admin/login.html')
+    return render_template('admin_login.html')
 
 @admin_bp.route('/logout')
 def logout():
