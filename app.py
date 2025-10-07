@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
+from admin import admin_bp
 from flask import (
     Flask, render_template, request, flash, redirect,
     url_for, jsonify, send_file, session
@@ -41,6 +42,9 @@ session_secret = os.environ.get("SESSION_SECRET")
 if not session_secret:
     raise RuntimeError("SESSION_SECRET environment variable must be set")
 app.secret_key = session_secret
+
+
+app.register_blueprint(admin_bp)
 
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
