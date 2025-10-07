@@ -378,39 +378,7 @@ def submit_payment():
         db.session.add(payment)
         db.session.commit()
         
-        # Send confirmation email
-        try:
-            items_list = json.loads(payment_items or '[]')
-            items_text = '\n'.join([f"- {item['name']}: ₦{item['amount']:,}" for item in items_list])
-            
-            msg = Message(
-                subject="Payment Submission Confirmation - Agricultural Engineering Dept",
-                recipients=[email] if email else [],
-                body=f"""
-                Dear {full_name},
-                
-                Your payment submission has been received successfully.
-                
-                Payment Details:
-                Matric Number: {matric_number}
-                Level: {level}L
-                Total Amount: ₦{total_amount:,}
-                Reference: {transaction_ref or 'N/A'}
-                Submission ID: {payment.id}
-                
-                Items Paid For:
-                {items_text}
-                
-                Your payment is currently under review. You will be notified once it's approved.
-                
-                Best regards,
-                Agricultural and Environmental Engineering Department
-                University of Ibadan
-                """
-            )
-            mail.send(msg)
-        except Exception as e:
-            app.logger.error(f"Error sending confirmation email: {str(e)}")
+        # Send confirmation email --- has beenn removed by me for production
         
         return jsonify({
             'success': True, 
