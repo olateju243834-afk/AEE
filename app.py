@@ -277,26 +277,7 @@ def contact():
         db.session.commit()
         
         # Create and send email
-        msg = Message(
-            subject=f"[AGRIC DEPT] {subject}",
-            recipients=[os.environ.get('CONTACT_EMAIL', 'agric.dept@ui.edu.ng')],
-            body=f"""
-            New message from department website:
-            
-            Name: {name}
-            Email: {email}
-            Subject: {subject}
-            
-            Message:
-            {message}
-            
-            Submission ID: {contact_submission.id}
-            Submitted: {contact_submission.created_at}
-            """
-        )
         
-        mail.send(msg)
-        flash('Thank you for your message! We will get back to you soon.', 'success')
         
     except Exception as e:
         db.session.rollback()
