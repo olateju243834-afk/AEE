@@ -43,7 +43,7 @@
                         <small class="text-white-50">{{ session.admin_username }}</small>
                     </div>
                     <nav class="nav nav-pills flex-column">
-                        <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                        <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">
                             <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                         </a>
                         <a class="nav-link" href="{{ url_for('admin_contacts') }}">
@@ -158,7 +158,7 @@
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5>Recent Contacts</h5>
-                                    <a href="{{ url_for('admin_contacts') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                                    <a href="{{ url_for('admin.contacts') }}" class="btn btn-sm btn-outline-primary">View All</a>
                                 </div>
                                 <div class="card-body">
                                     {% if recent_contacts %}
