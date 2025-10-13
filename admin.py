@@ -101,7 +101,7 @@ def payments():
     
     payments = query.order_by(Payment.created_at.desc()).paginate(
         page=page, per_page=20, error_out=False)
-    return render_template('admin/payments.html', payments=payments, status_filter=status_filter)
+    return render_template('admin/admin_payments.html', payments=payments, status_filter=status_filter)
 
 @admin_bp.route('/payments/<int:payment_id>')
 @login_required
