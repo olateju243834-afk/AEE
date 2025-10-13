@@ -72,7 +72,7 @@ def contacts():
     page = request.args.get('page', 1, type=int)
     contacts = Contact.query.order_by(Contact.created_at.desc()).paginate(
         page=page, per_page=20, error_out=False)
-    return render_template('admin/contacts.html', contacts=contacts)
+    return render_template('admin/admin_contacts.html', contacts=contacts)
 
 @admin_bp.route('/contacts/<int:contact_id>')
 @login_required
