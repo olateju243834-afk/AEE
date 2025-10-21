@@ -249,7 +249,7 @@ def stats():
     ).group_by('month').order_by('month').all()
 
     return render_template(
-        'admin/admin_stats.html',
+        'admin_stats.html',
         level_stats=level_stats,
         status_stats=status_stats,
         monthly_stats=monthly_stats
