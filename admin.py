@@ -78,7 +78,7 @@ def contacts():
 @login_required
 def view_contact(contact_id):
     contact = Contact.query.get_or_404(contact_id)
-    return render_template('admin/contact_detail.html', contact=contact)
+    return render_template('admin/admin_contact_detail.html', contact=contact)
 
 @admin_bp.route('/contacts/<int:contact_id>/delete', methods=['POST'])
 @login_required
@@ -111,7 +111,7 @@ def view_payment(payment_id):
         payment_items = json.loads(payment.payment_items) if payment.payment_items else []
     except:
         payment_items = []
-    return render_template('admin/payment_detail.html', payment=payment, payment_items=payment_items)
+    return render_template('admin/admin_payment_detail.html', payment=payment, payment_items=payment_items)
 
 @admin_bp.route('/payments/<int:payment_id>/update_status', methods=['POST'])
 @login_required
@@ -148,7 +148,7 @@ def edit_payment(payment_id):
         flash('Payment updated successfully!', 'success')
         return redirect(url_for('admin.view_payment', payment_id=payment_id))
     
-    return render_template('admin/edit_payment.html', payment=payment)
+    return render_template('admin/admin_edit_payment.html', payment=payment)
 
 @admin_bp.route('/payments/<int:payment_id>/delete', methods=['POST'])
 @login_required
