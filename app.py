@@ -251,7 +251,7 @@ def staff():
 
 @app.route('/payment')
 def payment():
-    return render_template('payment.html')
+    return render_template('admin/payment.html')
 
 @app.route('/academic_program')
 def academic_program():
