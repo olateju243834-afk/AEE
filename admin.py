@@ -220,19 +220,38 @@ def export_payments():
 @login_required
 def stats():
     # Payment statistics by level
-    level_stats = db.session.query(Payment.level, db.func.count(Payment.id), db.func.sum(Payment.total_amount)).group_by(Payment.level).all()
-    
+    level_stats = db.session.query(
+        Payment.level,
+        db.func.count(Payment.id),
+        db.func.sum(Payment.total_amount)
+    ).group_by(Payment.level).all()
+
     # Payment statistics by status
-    status_stats = db.session.query(Payment.status, db.func.count(Payment.id), db.func.sum(Payment.total_amount)).group_by(Payment.status).all()
-    
+    status_stats = db.session.query(
+        Payment.status,
+        db.func.count(Payment.id),
+        db.func.sum(Payment.total_amount)
+    ).group_by(Payment.status).all()
+
+    # Detect which database we're using
+    engine_name = db.engine.name  # 'postgresql', 'sqlite', etc.
+
     # Monthly payment trends
+    if engine_name == 'sqlite':
+        month_expr = db.func.strftime('%Y-%m', Payment.created_at)
+    else:
+        month_expr = db.func.to_char(Payment.created_at, 'YYYY-MM')
+
     monthly_stats = db.session.query(
-        db.func.strftime('%Y-%m', Payment.created_at).label('month'),
+        month_expr.label('month'),
         db.func.count(Payment.id).label('count'),
         db.func.sum(Payment.total_amount).label('total')
     ).group_by('month').order_by('month').all()
-    
-    return render_template('admin/stats.html', 
-                         level_stats=level_stats,
-                         status_stats=status_stats,
-                         monthly_stats=monthly_stats)
+
+    return render_template(
+        'admin/stats.html',
+        level_stats=level_stats,
+        status_stats=status_stats,
+        monthly_stats=monthly_stats
+    )
+
